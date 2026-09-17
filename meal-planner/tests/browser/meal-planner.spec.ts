@@ -1,0 +1,92 @@
+import { expect, test } from '@playwright/test'
+
+test.beforeEach(async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+})
+
+test('loads the empty workflow and exposes labelled preference controls', async ({ page }) => {
+  await expect(page.getByRole('heading', { name: 'No active plan yet' })).toBeVisible()
+  await expect(page.getByRole('radio', { name: 'Vegan' })).toBeVisible()
+  await expect(page.getByRole('checkbox', { name: 'Nuts' })).toBeVisible()
+  await expect(page.getByLabel('Add an ingredient')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Regenerate plan' })).toBeVisible()
+})
+
+test('configures preferences and generates a visible weekly plan', async ({ page }) => {
+  await page.getByRole('radio', { name: 'Vegetarian' }).check()
+  await page.getByRole('checkbox', { name: 'Dairy' }).check()
+  await page.getByLabel('Add an ingredient').fill('  tomato  ')
+  await page.getByRole('button', { name: 'Add' }).click()
+  await expect(page.getByText('tomato', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Remove tomato' }).click()
+  await page.getByRole('button', { name: 'Regenerate plan' }).click()
+  await expect(page.getByRole('heading', { name: 'Weekly plan' })).toBeVisible()
+  await expect(page.locator('.day-card')).toHaveCount(7)
+  await expect(page.locator('.day-heading').nth(0)).toContainText('Monday')
+  await expect(page.locator('.day-heading').nth(6)).toContainText('Sunday')
+  await expect(page.getByText('Breakfast', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Lunch', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Dinner', { exact: true }).first()).toBeVisible()
+})
+
+test('shows recipe details and preserves stale plan visibility after preference edits', async ({ page }) => {
+  await page.getByRole('button', { name: 'Regenerate plan' }).click()
+  await expect(page.getByRole('heading', { name: 'Weekly plan' })).toBeVisible()
+  await page.locator('.meal-row').first().click()
+  await expect(page.getByRole('heading', { name: 'Apple Cinnamon Oats' })).toBeVisible()
+  await expect(page.getByText('Ingredients', { exact: true })).toBeVisible()
+  await expect(page.getByText('Instructions', { exact: true })).toBeVisible()
+  await expect(page.getByText('20 minutes', { exact: true })).toBeVisible()
+  await expect(page.getByText('1 serving', { exact: true })).toBeVisible()
+  await page.getByLabel('Add an ingredient').fill('oat')
+  await page.getByRole('button', { name: 'Add' }).click()
+  await expect(page.getByText('Plan uses older preferences')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Weekly plan' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Apple Cinnamon Oats' })).toBeVisible()
+})
+
+test('saves, confirms overwrite, and restores the plan after reload', async ({ page }) => {
+  await page.getByRole('button', { name: 'Regenerate plan' }).click()
+  await page.getByRole('button', { name: 'Save plan' }).click()
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Weekly plan' })).toBeVisible()
+  await page.getByRole('button', { name: 'Save plan' }).click()
+  await expect(page.getByRole('alertdialog')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Replace the saved plan?' })).toBeVisible()
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
+})
+
+test('replaces one bundled meal without confirmation and preserves the other assignments', async ({ page }) => {
+  await page.getByRole('button', { name: 'Regenerate plan' }).click()
+  await page.locator('.meal-row').first().click()
+  const before = await page.locator('.meal-row .recipe-name').allTextContents()
+  await page.getByRole('button', { name: 'Replace meal' }).click()
+  await expect(page.getByRole('heading', { name: 'Herbed Bean Breakfast Bowl' })).toBeVisible()
+  const after = await page.locator('.meal-row .recipe-name').allTextContents()
+  expect(after[0]).not.toBe(before[0])
+  expect(after.slice(1)).toEqual(before.slice(1))
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
+})
+
+test('handles a genuine bundled no-candidate replacement non-destructively', async ({ page }) => {
+  await page.getByRole('checkbox', { name: 'Nuts' }).check()
+  await page.getByRole('button', { name: 'Regenerate plan' }).click()
+  await page.locator('.meal-row').first().click()
+  const before = await page.locator('.meal-row .recipe-name').first().textContent()
+  await expect(page.getByRole('button', { name: 'Replace meal' })).toBeVisible()
+  await page.getByRole('button', { name: 'Replace meal' }).click()
+  await expect(page.getByRole('alert')).toContainText('No valid replacement is available')
+  await expect(page.locator('.meal-row .recipe-name').first()).toHaveText(before ?? '')
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
+})
+
+test('keeps core content reachable at the configured responsive viewports', async ({ page }) => {
+  await page.getByRole('button', { name: 'Regenerate plan' }).click()
+  await expect(page.locator('.preferences-panel')).toBeVisible()
+  await expect(page.locator('.week-grid')).toBeVisible()
+  await expect(page.locator('.detail-panel')).toBeVisible()
+  await expect(page.locator('body')).toHaveCSS('overflow-x', 'visible')
+})
