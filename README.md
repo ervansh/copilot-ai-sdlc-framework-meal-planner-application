@@ -1116,25 +1116,40 @@ artifact and record the limitation instead of inventing a Pull Request.
 
 ---
 
-# Hooks Status
+## Hooks Status
 
-Hooks were deliberately deferred.
+Repository hooks are implemented under:
 
-The main capstone execution surface was VS Code Copilot Chat.
+.github/hooks/
 
-Repository hooks are planned for a future exercise using:
+Implemented hook events:
 
-* GitHub Copilot CLI
-* Copilot cloud agent
+- sessionStart
+- preToolUse
+- postToolUse
+- errorOccurred
 
-Potential future experiments include:
+The hooks provide:
 
-* blocking force pushes
-* blocking destructive resets
-* secret scanning
-* policy validation
-* audit logging
-* SDLC evidence validation
+- Agentic SDLC context injection
+- destructive-command protection
+- verification-evidence reminders
+- minimal execution/error auditing
+
+Runtime execution remains unverified in this capstone because the primary
+execution surface was VS Code Copilot Chat.
+
+GitHub currently documents repository hook execution for:
+
+- GitHub Copilot CLI
+- Copilot cloud agent
+
+Therefore:
+
+Hooks Implementation Status: COMPLETE
+
+Hooks Runtime Verification Status:
+DEFERRED — REQUIRES COPILOT CLI OR COPILOT CLOUD AGENT
 
 ---
 

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/session-start.mjs",
+        "powershell": "node .github/hooks/scripts/session-start.mjs",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/pre-tool-policy.mjs",
+        "powershell": "node .github/hooks/scripts/pre-tool-policy.mjs",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/post-tool-evidence.mjs",
+        "powershell": "node .github/hooks/scripts/post-tool-evidence.mjs",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ],
+    "errorOccurred": [
+      {
+        "type": "command",
+        "bash": "node .github/hooks/scripts/error-audit.mjs",
+        "powershell": "node .github/hooks/scripts/error-audit.mjs",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
