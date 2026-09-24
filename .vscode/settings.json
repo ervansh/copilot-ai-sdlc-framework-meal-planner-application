@@ -7,5 +7,6 @@
         "Test-Path": true,
         "npm audit": true,
         "npm test": true
-    }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }

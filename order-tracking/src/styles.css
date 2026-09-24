@@ -1,0 +1,52 @@
+:root {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #20302d;
+  background: #e8eee8;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+
+.shell {
+  min-height: 100vh;
+  padding: clamp(2rem, 8vw, 7rem) 1.25rem;
+  background: linear-gradient(135deg, #e8eee8 0%, #f7f3e9 58%, #d9e5e0 100%);
+}
+
+.lookup-panel {
+  width: min(100%, 38rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  background: #fffdf8;
+  border: 1px solid #cad8d0;
+  box-shadow: 0 1.5rem 3rem rgb(32 48 45 / 12%);
+}
+
+.eyebrow { margin: 0 0 .65rem; color: #b35435; font: 700 .75rem/1.2 Georgia, serif; letter-spacing: .12em; text-transform: uppercase; }
+h1, h2 { margin: 0; color: #20302d; font-weight: 500; }
+h1 { font-size: clamp(2.3rem, 8vw, 4.5rem); line-height: .98; }
+h2 { font-size: 1.65rem; }
+.intro { max-width: 32rem; margin: 1.25rem 0 2rem; color: #52645e; font-size: 1.05rem; line-height: 1.6; }
+.lookup-form { display: grid; gap: 1.25rem; }
+.field-group { display: grid; gap: .45rem; }
+label { font-weight: 700; }
+input { width: 100%; min-height: 3rem; padding: .7rem .8rem; border: 1px solid #9eb3aa; border-radius: 0; background: #fff; color: inherit; font: 1rem Georgia, serif; }
+input:focus-visible, button:focus-visible { outline: 3px solid #d4774c; outline-offset: 3px; }
+input[aria-invalid='true'] { border-color: #b35435; }
+.field-error, .failure { margin: 0; color: #a13e2a; line-height: 1.4; }
+button { min-height: 3rem; border: 0; border-radius: 0; padding: .8rem 1.1rem; background: #20302d; color: #fffdf8; cursor: pointer; font: 700 1rem Georgia, serif; }
+button:hover { background: #b35435; }
+.feedback { min-height: 5rem; margin-top: 2rem; }
+.result { border-top: 1px solid #cad8d0; padding-top: 1.5rem; }
+.result .eyebrow { margin-bottom: .45rem; }
+dl { display: grid; gap: .8rem; margin: 1.25rem 0 0; }
+dl div { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .8rem; border-bottom: 1px solid #dce5df; }
+dt { color: #52645e; }
+dd { margin: 0; text-align: right; font-weight: 700; }
+
+@media (max-width: 30rem) {
+  .lookup-panel { padding: 1.25rem; }
+  dl div { display: grid; gap: .25rem; }
+  dd { text-align: left; }
+}

@@ -1,49 +1,31 @@
-# Start SDLC Requirements Analysis
+# SDLC Requirements — Source Driven
 
-Use the `requirements-analyst` custom agent and the
-`requirements-analysis` skill.
+Use the `requirements-analyst` agent and `requirements-analysis` skill.
 
-Application:
+Provide explicit values in the chat:
 
-`meal-planner/`
+```text
+Application: <name>
+Application Root: <application-root>
+Source Type: <JIRA | CONFLUENCE | WORD>
+Source Reference: <reference>
+```
 
-Read the repository-wide instructions:
+Target:
 
-`.github/copilot-instructions.md`
+`<application-root>/docs/sdlc/requirements.md`
 
-Read existing Meal Planner SDLC artifacts if they exist under:
+Workflow:
 
-`meal-planner/docs/sdlc/`
+1. retrieve/read the source
+2. report source provenance and explicit facts
+3. ask only material clarification questions
+4. wait for human answers
+5. repeat until blocking questions = 0
+6. create requirements.md as PENDING APPROVAL
+7. stop for explicit human approval
+8. after explicit approval, record APPROVED
 
-We are operating only in the **Requirements Analysis** stage.
-
-Analyze the following initial user story:
-
-> As a user, I want to create a weekly meal plan based on my dietary
-> preferences, so that I can plan my meals more easily.
-
-Do not create architecture.
-
-Do not select technologies.
-
-Do not write application source code.
-
-Do not create implementation tasks.
-
-Do not write `requirements.md` yet.
-
-First:
-
-1. Summarize your understanding of the user story.
-2. Identify important ambiguity.
-3. Ask the first 8 clarification questions.
-4. Group related questions.
-5. For each question explain briefly why it matters.
-6. Provide reasonable options where useful.
-7. Identify blocking questions where applicable.
-8. Stop and wait for my answers.
-
-The final requirements artifact, after all clarification is complete, must
-eventually be written to:
-
-`meal-planner/docs/sdlc/requirements.md`
+Do not invent the source story.
+Do not use another application's paths.
+A requirements commit is optional operational evidence and is not an Architecture entry gate.

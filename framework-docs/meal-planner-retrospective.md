@@ -68,7 +68,31 @@ runtime vulnerability.
 
 ---
 
-# Lesson 1 — Review Artifacts Are Historical Evidence
+# Lesson 1 — Source-Driven Requirements Prevented Silent Scope Drift
+
+The framework was updated to require a source artifact before requirements are
+explored. This mattered because requirements work became much more reliable when
+Copilot had to retrieve and cite the original Jira, Confluence, or Word source
+instead of inferring the product story from a chat description.
+
+## Correct Rule
+
+Requirements are valid only when they can be traced back to:
+
+- an authoritative source story
+- explicit clarification answers
+- confirmed overrides that intentionally differ from the source
+
+A chat summary is useful context, but it cannot substitute for the source.
+
+## Framework Change
+
+The requirements workflow was updated to require source intake, provenance,
+clarification IDs, and explicit approval before architecture begins.
+
+---
+
+# Lesson 2 — Review Artifacts Are Historical Evidence
 
 One of the first framework defects appeared during Implementation Planning.
 
@@ -111,7 +135,7 @@ This became one of the most important reusable framework principles.
 
 ---
 
-# Lesson 2 — Explicit Task IDs Were More Reliable Than Prompt Placeholders
+# Lesson 3 — Explicit Task IDs Were More Reliable Than Prompt Placeholders
 
 The first implementation prompt attempted to obtain a task ID using a prompt
 input placeholder.
@@ -135,7 +159,7 @@ This had two benefits:
 
 ---
 
-# Lesson 3 — One Task at a Time Worked Well
+# Lesson 4 — One Task at a Time Worked Well
 
 The implementation plan contained 15 tasks.
 
@@ -170,7 +194,7 @@ IMP-009 depended on preference, generation, replacement, and persistence work.
 
 ---
 
-# Lesson 4 — Human Acceptance Should Be Separate From Implementation Success
+# Lesson 5 — Human Acceptance Should Be Separate From Implementation Success
 
 Implementation agents were not allowed to mark their own tasks DONE.
 
@@ -193,7 +217,7 @@ to manually write all application code.
 
 ---
 
-# Lesson 5 — Domain Tests Can Pass While the Real Application Still Cannot Use a Feature
+# Lesson 6 — Domain Tests Can Pass While the Real Application Still Cannot Use a Feature
 
 This was one of the most important technical discoveries.
 
@@ -259,7 +283,7 @@ End-to-end verification must use realistic production data.
 
 ---
 
-# Lesson 6 — Feasibility and Generation Should Be Separate Responsibilities
+# Lesson 7 — Feasibility and Generation Should Be Separate Responsibilities
 
 Implementation Planning separated:
 
@@ -289,7 +313,7 @@ This separation reduced domain complexity and made testing easier.
 
 ---
 
-# Lesson 7 — Search Budget Exhaustion Is Not the Same as Infeasibility
+# Lesson 8 — Search Budget Exhaustion Is Not the Same as Infeasibility
 
 The architecture introduced defensive generation limits.
 
@@ -320,7 +344,7 @@ Operational limits must not silently change business meaning.
 
 ---
 
-# Lesson 8 — Snapshot Authority Needed Careful Design
+# Lesson 9 — Snapshot Authority Needed Careful Design
 
 The application distinguishes:
 
@@ -364,7 +388,7 @@ implementation.
 
 ---
 
-# Lesson 9 — Test Counts Must Be Reconciled
+# Lesson 10 — Test Counts Must Be Reconciled
 
 After IMP-012 the reported full suite had:
 
@@ -404,7 +428,7 @@ When numbers move unexpectedly:
 
 ---
 
-# Lesson 10 — Browser Tests Added Value Beyond UI Testing
+# Lesson 11 — Browser Tests Added Value Beyond UI Testing
 
 Browser verification was initially thought of primarily as a UI check.
 
@@ -428,7 +452,7 @@ End-to-end tests are particularly valuable at boundaries between:
 
 ---
 
-# Lesson 11 — Manual Verification Still Has a Place
+# Lesson 12 — Manual Verification Still Has a Place
 
 During the responsive implementation task, automated browser viewport tooling
 was temporarily unavailable.
@@ -453,7 +477,7 @@ It should not be silently replaced with assumed automation.
 
 ---
 
-# Lesson 12 — Independent Code Review Should Re-run Verification
+# Lesson 13 — Independent Code Review Should Re-run Verification
 
 The Code Reviewer did not simply read the implementation log.
 
@@ -481,7 +505,7 @@ checks whenever possible.
 
 ---
 
-# Lesson 13 — Final Verification Should Verify Every Requirement Individually
+# Lesson 14 — Final Verification Should Verify Every Requirement Individually
 
 Final Verification produced explicit tables for:
 
@@ -514,7 +538,7 @@ own evidence.
 
 ---
 
-# Lesson 14 — Dependency Advisories Need Context
+# Lesson 15 — Dependency Advisories Need Context
 
 The project reported two moderate audit advisories involving:
 
@@ -548,7 +572,7 @@ Never force dependency upgrades simply to produce a clean audit number.
 
 ---
 
-# Lesson 15 — PR Preparation Must Not Fabricate Remote State
+# Lesson 16 — PR Preparation Must Not Fabricate Remote State
 
 Pull Request Preparation successfully generated:
 
@@ -586,7 +610,7 @@ If Git/GitHub execution is unavailable:
 
 ---
 
-# Lesson 16 — Do Not Automatically Attribute Capacity Errors to the Free Plan
+# Lesson 17 — Do Not Automatically Attribute Capacity Errors to the Free Plan
 
 The capstone was performed using Copilot Free.
 
@@ -620,7 +644,7 @@ unless official evidence confirms the cause.
 
 ---
 
-# Lesson 17 — Hooks Should Be Tested Only on Supported Surfaces
+# Lesson 18 — Hooks Should Be Tested Only on Supported Surfaces
 
 The original capstone included:
 
@@ -637,9 +661,10 @@ Current GitHub documentation describes Copilot hooks for:
 - Copilot CLI
 - Copilot cloud agent
 
-Therefore hooks were not fabricated as a VS Code test.
-
-They remain a future framework exercise.
+Therefore the repository includes hook configuration and scripts, but the
+capstone did not claim runtime verification through VS Code Copilot Chat.
+Runtime verification remains a separate exercise on a supported Copilot CLI or
+cloud-agent surface.
 
 ## Candidate Future Hook Experiments
 

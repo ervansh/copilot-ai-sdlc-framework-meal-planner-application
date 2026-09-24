@@ -32,6 +32,11 @@ The resulting workflow keeps humans responsible for approval decisions while
 allowing specialized Copilot agents to perform analysis, design,
 implementation, review, and verification.
 
+The framework is multi-application. Every run establishes an explicit
+Application and Application Root; application source, tests, and SDLC evidence
+must remain under that root. `meal-planner/` is the completed capstone example,
+not a required application name.
+
 ---
 
 # Project Status
@@ -84,7 +89,7 @@ copilot-capstone/
 │   ├── copilot-customization-guide.md
 │   └── meal-planner-retrospective.md
 │
-├── meal-planner/
+├── <application-root>/
 │   ├── docs/
 │   │   └── sdlc/
 │   │       ├── requirements.md
@@ -111,7 +116,13 @@ copilot-capstone/
 The framework uses the following lifecycle:
 
 ```text
-Requirements Analysis
+Authoritative User Story Source
+        ↓
+Requirements Source Intake
+        ↓
+Clarification and Gap Resolution
+        ↓
+requirements.md
         ↓
 Human Requirements Approval
         ↓
@@ -137,6 +148,10 @@ Pull Request Preparation
         ↓
 Human Pull Request Review
 ```
+
+The Requirements stage is source-driven: a Jira item, Confluence page, or Word
+.docx becomes the authoritative starting point, with explicit clarification and a
+human approval gate before architecture begins.
 
 Each stage produces repository evidence rather than relying only on Copilot
 conversation history.
@@ -182,6 +197,8 @@ Examples:
 
 ```text
 requirements-analyst.agent.md
+sdlc-orchestrator.agent.md
+user-story-documenter.agent.md
 solution-architect.agent.md
 design-reviewer.agent.md
 implementation-planner.agent.md
@@ -189,7 +206,14 @@ implementation-engineer.agent.md
 code-reviewer.agent.md
 verification-engineer.agent.md
 pr-preparer.agent.md
+framework-docs-maintainer.agent.md
 ```
+
+The framework distinguishes between:
+
+* the authoritative source story (Jira, Confluence, or Word)
+* the Confluence documentation artifact created from it
+* the approved downstream contract in `<application-root>/docs/sdlc/requirements.md`
 
 ---
 
@@ -240,6 +264,7 @@ sdlc-implement-task.prompt.md
 sdlc-code-review.prompt.md
 sdlc-final-verification.prompt.md
 sdlc-pr-preparation.prompt.md
+sdlc-orchestrate.prompt.md
 ```
 
 ---
@@ -254,11 +279,10 @@ Repository hook configuration belongs under:
 .github/hooks/
 ```
 
-Hooks were intentionally deferred in this project because the main exercise was
-performed through VS Code Copilot Chat.
-
-A future iteration can exercise hooks through GitHub Copilot CLI or Copilot
-cloud agent.
+The repository includes hook configuration and scripts for deterministic
+guardrails. Runtime behavior has not been claimed as verified through the main
+VS Code Copilot Chat workflow; verify hooks through a supported GitHub Copilot
+CLI or cloud-agent surface before relying on them for operational governance.
 
 Potential framework hooks include:
 
@@ -268,25 +292,64 @@ Potential framework hooks include:
 * policy validation
 * validating expected SDLC evidence before agent completion
 
+The configured events are `sessionStart`, `preToolUse`, `postToolUse`, and
+`errorOccurred`. There is intentionally no generic `agentStop` gate because
+different specialist roles have different completion artifacts.
+
+---
+
+## MCP = EXTERNAL SYSTEMS
+
+Authorized MCP tools provide access to external systems such as Jira and
+Confluence. Agents must use the configured tool boundary and must not extract
+credentials or bypass an unavailable MCP capability with direct requests.
+
 ---
 
 # Specialized Agents
+
+## SDLC Orchestrator
+
+Purpose:
+
+Coordinate the application lifecycle across specialist agent stages without
+performing the specialist work itself.
+
+Output:
+
+```text
+Application lifecycle progression and delegation decisions
+```
+
+Key responsibilities:
+
+* establish application context and run mode
+* read the active application's authoritative SDLC artifacts
+* delegate each stage to the corresponding specialist agent
+* pause only at required human approval and task acceptance gates
+* keep lifecycle state aligned with the active application root
+* never merge pull requests or infer approval from silence
+
+---
 
 ## Requirements Analyst
 
 Purpose:
 
-Convert an initial user story into a complete, traceable requirements artifact.
+Convert an authoritative user story source into a complete, traceable
+requirements artifact.
 
 Output:
 
 ```text
-meal-planner/docs/sdlc/requirements.md
+<application-root>/docs/sdlc/requirements.md
 ```
 
 Key responsibilities:
 
-* clarification questions
+* source retrieval and provenance capture
+* Jira/Confluence/Word intake handling
+* clarification questions using Q-001, Q-002, ...
 * functional requirements
 * non-functional requirements
 * acceptance criteria
@@ -294,6 +357,52 @@ Key responsibilities:
 * scope boundaries
 * assumptions
 * traceability
+* explicit human approval gate before architecture
+
+---
+
+## User Story Documenter
+
+Purpose:
+
+Create a readable Confluence documentation artifact from an authoritative
+story, without replacing the downstream SDLC requirements contract.
+
+Output:
+
+```text
+Confluence page or equivalent user story documentation artifact
+```
+
+Credential boundary:
+
+* reads authoritative source content
+* publishes or updates Confluence only when the user explicitly requests it
+* keeps the documentation artifact distinct from requirements.md
+
+---
+
+## Framework Documentation Maintainer
+
+Purpose:
+
+Synchronize reusable framework documentation with the actual repository
+configuration, lifecycle, agents, skills, prompts, and documented workflow.
+
+Output:
+
+```text
+framework-docs/*.md
+README.md
+```
+
+Key responsibilities:
+
+* review framework changes
+* check repo evidence against documentation
+* keep lifecycle and gate documentation accurate
+* document current integrations and customizations
+* avoid describing planned or unverified behavior as implemented
 
 ---
 
@@ -306,7 +415,7 @@ Convert approved requirements into an implementation-ready architecture.
 Output:
 
 ```text
-meal-planner/docs/sdlc/architecture.md
+<application-root>/docs/sdlc/architecture.md
 ```
 
 Key responsibilities:
@@ -334,7 +443,7 @@ Independently review the architecture.
 Output:
 
 ```text
-meal-planner/docs/sdlc/design-review.md
+<application-root>/docs/sdlc/design-review.md
 ```
 
 Possible outcomes:
@@ -359,7 +468,7 @@ implementation work.
 Output:
 
 ```text
-meal-planner/docs/sdlc/impl-plan.md
+<application-root>/docs/sdlc/impl-plan.md
 ```
 
 The Meal Planner implementation plan contains:

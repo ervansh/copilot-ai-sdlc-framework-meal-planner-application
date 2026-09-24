@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This document describes the reusable Agentic SDLC framework built during the
-Meal Planner capstone.
+This document describes the reusable Agentic SDLC framework built and exercised
+during the Meal Planner capstone.
 
 The framework uses GitHub Copilot customization capabilities to guide software
 delivery through explicit lifecycle stages, independent review roles, artifact
@@ -11,7 +11,9 @@ traceability, and human approval gates.
 
 The framework is intentionally repository-driven.
 
-It does not depend on a single application domain.
+It does not depend on a single application domain. Each run establishes an
+explicit Application and Application Root, and all source, tests, and SDLC
+artifacts remain isolated to that application.
 
 The Meal Planner application was used to exercise and validate the framework,
 but the lifecycle is intended to be reusable for other software projects.
@@ -60,7 +62,43 @@ Later stages must not silently perform work owned by an earlier stage.
 
 ---
 
-## 3. Human-in-the-Loop Gates
+## 3. Source-Driven Requirements
+
+Requirements Analysis begins from an authoritative source artifact, not from a
+chat description alone.
+
+Supported sources include:
+
+- Jira work item
+- Confluence page
+- Microsoft Word `.docx`
+
+Before asking requirements questions, the Requirements Analyst must:
+
+1. identify the source type
+2. retrieve and read the source
+3. record source provenance
+4. summarize only what the source actually states
+5. identify gaps, ambiguities, and conflicts
+6. ask only the missing clarification questions
+
+This keeps requirements grounded in source evidence and prevents Copilot from
+silently inventing product decisions.
+
+The source-driven workflow uses stable clarification IDs such as Q-001,
+Q-002, and so on. Human responses become confirmed decisions only when the
+user explicitly answers them.
+
+When the requirements are finalized, they are written to:
+
+- `<application-root>/docs/sdlc/requirements.md`
+
+and remain in `PENDING APPROVAL` until a human explicitly approves them.
+
+The approved requirements artifact becomes the authoritative downstream SDLC
+contract for architecture and implementation.
+
+## 4. Human-in-the-Loop Gates
 
 Copilot may analyze, design, implement, review, and verify work.
 
@@ -79,7 +117,7 @@ An agent must stop when a required gate has not passed.
 
 ---
 
-## 4. Independent Review
+## 5. Independent Review
 
 The agent that creates an artifact must not automatically approve its own work.
 
@@ -95,7 +133,7 @@ This separation makes review results more meaningful.
 
 ---
 
-## 5. Artifact-Based State
+## 6. Artifact-Based State
 
 Lifecycle state is stored in repository artifacts rather than inferred from chat
 history.
@@ -114,6 +152,22 @@ Examples:
 This allows another Copilot session or human reviewer to understand the current
 state without relying on previous conversations.
 
+## 7. Confluence Story Documentation Is Distinct From Requirements
+
+The framework also includes a separate Confluence documentation agent for user-story
+publishing and a framework documentation maintainer for repository-level docs sync.
+
+These artifacts are documentation, not the application-level requirements contract.
+
+The relationship is:
+
+- Source User Story: the original Jira, Confluence, or Word source
+- Confluence User Story Documentation Artifact: readable project documentation
+- requirements.md: the approved downstream SDLC contract used for architecture
+  and implementation
+
+These are related but not interchangeable.
+
 ---
 
 # Repository Structure
@@ -128,7 +182,7 @@ copilot-capstone/
 │   ├── hooks/
 │   └── copilot-instructions.md
 ├── framework-docs/
-├── meal-planner/
+├── <application-root>/
 │   ├── docs/
 │   │   └── sdlc/
 │   ├── src/
@@ -140,8 +194,8 @@ copilot-capstone/
 
 `framework-docs/` documents the reusable framework.
 
-`meal-planner/` contains the application and its application-specific SDLC
-artifacts.
+`<application-root>/` contains one application and its application-specific
+SDLC artifacts. `meal-planner/` is the capstone example, not a required root.
 
 ---
 
@@ -165,6 +219,7 @@ An Agent defines:
 Examples:
 
 - Requirements Analyst
+- SDLC Orchestrator
 - Solution Architect
 - Design Reviewer
 - Implementation Planner
@@ -172,6 +227,8 @@ Examples:
 - Code Reviewer
 - Verification Engineer
 - Pull Request Preparer
+- User Story Documenter
+- Framework Documentation Maintainer
 
 ---
 
@@ -208,6 +265,8 @@ Examples:
 - create implementation plan
 - implement IMP-006
 - perform final verification
+- orchestrate the full SDLC workflow
+- maintain framework documentation
 
 A Prompt should provide enough application context to begin the task while
 leaving methodology to the Skill and responsibilities to the Agent.
@@ -241,21 +300,20 @@ They are useful for deterministic guardrails such as:
 - logging activity
 - running validation
 
-In this project, hooks were deferred because the primary workflow was VS Code
-Copilot Chat.
-
-The current GitHub hook documentation describes repository hooks for Copilot
-CLI and Copilot cloud agent.
-
-Hooks should therefore be added only when the execution surface supports them.
+This repository contains hook configuration and scripts under `.github/hooks/`.
+They provide deterministic policy checks, verification-evidence reminders, and
+minimal error/audit metadata. Their runtime behavior has not been claimed as
+verified through the primary VS Code workflow; verify them on a supported
+Copilot CLI or cloud-agent surface before treating them as operational
+governance.
 
 ---
 
 # Lifecycle Artifacts
 
-The Meal Planner exercise used these application artifacts:
+Each application uses these artifacts:
 
-meal-planner/docs/sdlc/
+<application-root>/docs/sdlc/
 ├── requirements.md
 ├── architecture.md
 ├── design-review.md
@@ -281,7 +339,7 @@ Do not use every artifact as an authority for every lifecycle state.
 
 Authoritative artifact:
 
-meal-planner/docs/sdlc/requirements.md
+`<application-root>/docs/sdlc/requirements.md`
 
 Example state:
 
@@ -293,7 +351,7 @@ Requirements Status: APPROVED
 
 Authoritative artifact:
 
-meal-planner/docs/sdlc/architecture.md
+`<application-root>/docs/sdlc/architecture.md`
 
 Example states:
 
@@ -315,7 +373,7 @@ It must not override a later human approval stored in architecture.md.
 
 Authoritative artifact:
 
-meal-planner/docs/sdlc/design-review.md
+`<application-root>/docs/sdlc/design-review.md`
 
 Example:
 
@@ -327,7 +385,7 @@ Review Outcome: PASS
 
 Authoritative artifact:
 
-meal-planner/docs/sdlc/impl-plan.md
+`<application-root>/docs/sdlc/impl-plan.md`
 
 Example:
 
@@ -339,11 +397,11 @@ Implementation Plan Status: APPROVED
 
 Authoritative artifacts:
 
-meal-planner/docs/sdlc/impl-plan.md
+`<application-root>/docs/sdlc/impl-plan.md`
 
 and:
 
-meal-planner/docs/sdlc/implementation-log.md
+`<application-root>/docs/sdlc/implementation-log.md`
 
 The implementation plan records task status.
 
@@ -355,7 +413,7 @@ The implementation log records execution and human acceptance evidence.
 
 Authoritative artifact:
 
-meal-planner/docs/sdlc/code-review.md
+`<application-root>/docs/sdlc/code-review.md`
 
 Example:
 
@@ -367,7 +425,7 @@ Review Outcome: PASS
 
 Authoritative artifact:
 
-meal-planner/docs/sdlc/verification.md
+`<application-root>/docs/sdlc/verification.md`
 
 Example:
 
@@ -387,9 +445,7 @@ Requirements Analyst
 
 ## Inputs
 
-- user story
-- business request
-- available source documentation
+- authoritative Jira, Confluence, or Word source
 - repository instructions
 
 ## Output
@@ -398,7 +454,9 @@ requirements.md
 
 ## Responsibilities
 
-- clarify ambiguous requirements
+- retrieve the source through the authorized source tool
+- record provenance and summarize source facts
+- clarify only material gaps and ambiguities
 - distinguish confirmed facts from assumptions
 - define functional requirements
 - define non-functional requirements
@@ -902,8 +960,12 @@ Validated capabilities include:
 - independent code review
 - final traceability verification
 - PR preparation
+- user-story documentation boundary
+- framework documentation maintenance
+- deterministic hook guardrails (configuration present; runtime verification pending)
 
-Hooks remain deferred for a future Copilot CLI or Copilot cloud-agent exercise.
+The Meal Planner application remains the completed example; its application
+artifacts are evidence of one run, not universal framework requirements.
 
 ---
 

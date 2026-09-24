@@ -35,6 +35,8 @@ Prompt = WHAT NOW
 
 Hook = DETERMINISTIC EVENT AUTOMATION
 
+MCP = EXTERNAL SYSTEMS
+
 ---
 
 # 1. Custom Instructions
@@ -61,9 +63,9 @@ Examples:
 
 ## Good Instruction
 
-Always place Meal Planner source under:
+Always place application source under:
 
-meal-planner/src/
+<application-root>/src/
 
 ## Bad Instruction
 
@@ -88,6 +90,10 @@ Examples used by this framework:
 
 requirements-analyst.agent.md
 
+sdlc-orchestrator.agent.md
+
+user-story-documenter.agent.md
+
 solution-architect.agent.md
 
 design-reviewer.agent.md
@@ -101,6 +107,27 @@ code-reviewer.agent.md
 verification-engineer.agent.md
 
 pr-preparer.agent.md
+
+framework-docs-maintainer.agent.md
+
+## External Integration Boundaries
+
+This framework also distinguishes between repository-authoritative artifacts and
+external documentation systems.
+
+Examples:
+
+- Atlassian MCP is used for Jira and Confluence retrieval
+- Word intake must be supported through the requirements-analysis extraction workflow
+- Confluence publication is separate from the approved SDLC requirements contract
+- Framework documentation maintenance is a repository-only documentation role
+
+Agents must not read credential-bearing MCP configuration or construct direct
+REST calls to bypass an unavailable authorized tool. If the required source
+tool is unavailable, the requirements stage reports `SOURCE ACCESS BLOCKED`.
+
+The important rule is that external publishing does not redefine the
+requirements source of truth.
 
 ## Agent Responsibilities
 
@@ -280,6 +307,8 @@ sdlc-final-verification.prompt.md
 
 sdlc-pr-preparation.prompt.md
 
+sdlc-orchestrate.prompt.md
+
 ## Prompt Responsibility
 
 A prompt answers:
@@ -356,10 +385,10 @@ Current GitHub documentation describes Copilot hooks for:
 - Copilot CLI
 - Copilot cloud agent
 
-The VS Code-focused capstone therefore did not claim to execute repository
-hooks.
-
-Hooks were intentionally deferred.
+The repository contains hook configuration and scripts, but this capstone has
+not claimed runtime verification through VS Code Copilot Chat. Verify hooks on
+a supported Copilot CLI or cloud-agent surface before relying on them for
+operational governance.
 
 ---
 
@@ -512,7 +541,7 @@ Example:
 
 I explicitly approve:
 
-meal-planner/docs/sdlc/architecture.md
+`<application-root>/docs/sdlc/architecture.md`
 
 Then update the authoritative artifact.
 
@@ -685,6 +714,10 @@ sdlc-final-verification.prompt.md
 
 requirements-analyst.agent.md
 
+sdlc-orchestrator.agent.md
+
+user-story-documenter.agent.md
+
 solution-architect.agent.md
 
 design-reviewer.agent.md
@@ -698,6 +731,8 @@ code-reviewer.agent.md
 verification-engineer.agent.md
 
 pr-preparer.agent.md
+
+framework-docs-maintainer.agent.md
 
 ## Skills
 
@@ -734,6 +769,20 @@ sdlc-code-review.prompt.md
 sdlc-final-verification.prompt.md
 
 sdlc-pr-preparation.prompt.md
+
+sdlc-orchestrate.prompt.md
+
+## Hooks
+
+.github/hooks/sdlc-guardrails.json
+
+.github/hooks/scripts/session-start.mjs
+
+.github/hooks/scripts/pre-tool-policy.mjs
+
+.github/hooks/scripts/post-tool-evidence.mjs
+
+.github/hooks/scripts/error-audit.mjs
 
 ---
 
