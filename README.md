@@ -156,6 +156,50 @@ human approval gate before architecture begins.
 Each stage produces repository evidence rather than relying only on Copilot
 conversation history.
 
+## Run Prompts
+
+Choose the matching prompt file for the workflow and provide its required
+context. The Application Root is authoritative; do not substitute another
+application's directory. For a new application, `Run Mode: START` is valid even
+when that root does not exist yet. For an existing application, use
+`Run Mode: RESUME` to determine its lifecycle state from that root's artifacts
+and continue from its earliest incomplete gate.
+
+| Workflow | Prompt file | Required context |
+| --- | --- | --- |
+| Requirements analysis | `.github/prompts/sdlc-requirements.prompt.md` | Application, Application Root, Source Type (`JIRA`, `CONFLUENCE`, or `WORD`), Source Reference |
+| Architecture | `.github/prompts/sdlc-architecture.prompt.md` | Application, Application Root; requirements must be approved |
+| Design review | `.github/prompts/sdlc-design-review.prompt.md` | Application, Application Root |
+| Implementation planning | `.github/prompts/sdlc-implementation-plan.prompt.md` | Application, Application Root; approved requirements and architecture plus a passing design review |
+| Implement one task | `.github/prompts/sdlc-implement-task.prompt.md` | Application, Application Root, exact Task ID such as `IMP-006` |
+| Code review | `.github/prompts/sdlc-code-review.prompt.md` | Application, Application Root |
+| Final verification | `.github/prompts/sdlc-final-verification.prompt.md` | Application, Application Root |
+| Pull Request preparation | `.github/prompts/sdlc-pr-preparation.prompt.md` | Application, Application Root; verification must allow PR preparation |
+| Orchestrate lifecycle | `.github/prompts/sdlc-orchestrate.prompt.md` | Application, Application Root, Run Mode; for external-source requirements also Source Type and Source Reference; choose whether to publish story documentation to Confluence |
+| Publish story documentation | `.github/prompts/publish-story-documentation.prompt.md` | Application, Application Root, Story ID / Source Reference, Confluence Space; this prompt explicitly authorizes the bounded publication task |
+
+For a direct requirements run, start with:
+
+```text
+Application: <name>
+Application Root: <application-root>
+Source Type: <JIRA | CONFLUENCE | WORD>
+Source Reference: <reference>
+```
+
+For orchestration, add:
+
+```text
+Run Mode: <START | RESUME>
+Publish User Story to Confluence: <YES | NO>
+```
+
+Human approval and task-acceptance gates remain explicit. A prompt invocation
+does not approve requirements, architecture, an implementation plan, or an
+implementation task. Framework documentation maintenance is performed with
+the `framework-docs-maintainer` agent; there is no dedicated prompt file for
+that role.
+
 ---
 
 # Core Framework Model

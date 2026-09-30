@@ -246,6 +246,7 @@ Examples:
 - code-review
 - final-verification
 - pull-request-preparation
+- user-story-documentation
 
 Skills should remain reusable across applications when possible.
 
@@ -266,10 +267,13 @@ Examples:
 - implement IMP-006
 - perform final verification
 - orchestrate the full SDLC workflow
-- maintain framework documentation
+- publish finalized story documentation
 
 A Prompt should provide enough application context to begin the task while
 leaving methodology to the Skill and responsibilities to the Agent.
+Framework documentation maintenance is performed by the
+`framework-docs-maintainer` agent; the repository has no dedicated prompt for
+that role.
 
 ---
 

@@ -224,6 +224,8 @@ Examples:
 
 .github/skills/pull-request-preparation/SKILL.md
 
+.github/skills/user-story-documentation/SKILL.md
+
 ## Skill Structure
 
 A skill contains YAML frontmatter and instructions.
@@ -309,6 +311,8 @@ sdlc-pr-preparation.prompt.md
 
 sdlc-orchestrate.prompt.md
 
+publish-story-documentation.prompt.md
+
 ## Prompt Responsibility
 
 A prompt answers:
@@ -392,31 +396,25 @@ operational governance.
 
 ---
 
-# Candidate Hooks for This Framework
+# Current Hook Configuration
 
-A future CLI/cloud-agent implementation could add hooks for:
+The configured hooks and scripts are under `.github/hooks/`:
 
-## Dangerous Git Operations
+- `sessionStart` injects repository SDLC guardrails.
+- `preToolUse` denies selected destructive or unsafe shell operations,
+  including forced pushes, hard resets, forced cleanup, PR merges, and
+  `npm audit fix --force`.
+- `postToolUse` recognizes verification commands, reminds the agent to record
+  actual evidence, and writes minimal tool metadata to
+  `.git/copilot-hooks-audit.jsonl` when Git metadata is available.
+- `errorOccurred` records minimal error-event metadata without storing full
+  messages, arguments, stack traces, or credentials.
 
-Block commands such as:
-
-git push --force
-
-git reset --hard
-
-destructive branch deletion
-
-## Security
-
-Run secret scanning before selected operations.
-
-## Audit Logging
-
-Record tool execution outcomes.
-
-## Stop-Time Validation
-
-Check whether required SDLC evidence exists before an agent session completes.
+There is no generic `agentStop` evidence gate. The hook configuration exists,
+but runtime behavior has not been claimed as verified through VS Code Copilot
+Chat; verify it on a supported Copilot CLI or cloud-agent surface before
+relying on it for operational governance. See `.github/hooks/README.md` for
+detailed behavior and test guidance.
 
 ---
 
@@ -704,7 +702,7 @@ sdlc-final-verification.prompt.md
 
 ---
 
-# Framework Customizations Created
+# Framework Customizations Present
 
 ## Instructions
 
@@ -751,6 +749,7 @@ code-review
 final-verification
 
 pull-request-preparation
+user-story-documentation
 
 ## Prompts
 
@@ -771,6 +770,7 @@ sdlc-final-verification.prompt.md
 sdlc-pr-preparation.prompt.md
 
 sdlc-orchestrate.prompt.md
+publish-story-documentation.prompt.md
 
 ## Hooks
 
