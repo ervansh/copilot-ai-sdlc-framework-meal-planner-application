@@ -346,3 +346,24 @@ Tests alone do not prove implementation occurred.
 
 When work pre-existed the task run, explicitly distinguish pre-existing work from changes made during the task.
 
+# Repository Instructions Addendum — Documentation Publication
+
+Merge these rules into `.github/copilot-instructions.md`.
+
+## Confluence Documentation Authority
+
+Confluence is a human-readable publication and collaboration surface.
+
+It is not authoritative for Agentic SDLC lifecycle state.
+
+For SDLC decisions and statuses, use the repository artifacts under the active
+application's `docs/sdlc/` directory.
+
+The `user-story-documenter` specialist is the sole owner of story-scoped
+Confluence publication.
+
+No other specialist should create or update Confluence SDLC documentation unless
+the user explicitly requests an exceptional one-off action.
+
+Confluence publication must be story-scoped, idempotent, and based on finalized
+repository artifacts. Existing pages should be updated rather than duplicated.

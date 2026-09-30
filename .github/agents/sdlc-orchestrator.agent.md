@@ -247,3 +247,28 @@ Normal endpoint:
 or an accurate blocked/prepared status.
 
 Never merge automatically.
+
+# SDLC Orchestrator Addendum — Confluence Is Not an SDLC Stage
+
+Merge the following rule into `sdlc-orchestrator.agent.md`.
+
+## Documentation Publication Boundary
+
+Confluence publication is not an SDLC lifecycle stage and must not be used as an
+entry gate, approval gate, completion gate, or lifecycle state authority.
+
+The orchestrator must not automatically invoke `user-story-documenter` while
+executing the Agentic SDLC.
+
+Repository artifacts remain authoritative for requirements, architecture,
+review, planning, implementation, verification, and PR preparation state.
+
+After the SDLC run reaches its terminal handoff, the orchestrator may report:
+
+`Story documentation can now be published to Confluence using
+user-story-documenter.`
+
+This is informational only. Publication is a separate, explicitly invoked task.
+
+Do not block PR preparation because Confluence publication has not occurred.
+
