@@ -26,7 +26,7 @@ test('AC-002 and AC-005: normalizes identifiers and renders only approved tracki
   await page.getByLabel('Email address').fill(`  ${validEmailAddress.toUpperCase()}  `)
   await page.getByRole('button', { name: 'Find my order' }).click()
 
-  const result = page.getByRole('region', { name: 'Order ORD-1001' })
+  const result = page.getByRole('article', { name: 'Order ORD-1001' })
   await expect(result).toBeVisible()
   await expect(result).toContainText(expectedStatus)
   await expect(result).toContainText(expectedTimestamp)
@@ -47,7 +47,7 @@ test('AC-003 and AC-004: uses one generic failure state for all unsuccessful var
     await page.getByRole('button', { name: 'Find my order' }).click()
 
     await expect(page.getByRole('status')).toHaveText(genericFailureMessage)
-    await expect(page.getByRole('region', { name: /Order/ })).toHaveCount(0)
+    await expect(page.getByRole('article', { name: /Order/ })).toHaveCount(0)
   }
 })
 
@@ -64,7 +64,7 @@ test('AC-006: completes the lookup using keyboard-only interaction', async ({ pa
   await expect(page.getByRole('button', { name: 'Find my order' })).toBeFocused()
   await page.keyboard.press('Enter')
 
-  await expect(page.getByRole('region', { name: 'Order ORD-1001' })).toBeVisible()
+  await expect(page.getByRole('article', { name: 'Order ORD-1001' })).toBeVisible()
 })
 
 test('AC-007: renders a normal local lookup in under one second after submit', async ({ page }) => {
@@ -74,7 +74,7 @@ test('AC-007: renders a normal local lookup in under one second after submit', a
 
   const start = await page.evaluate(() => performance.now())
   await page.getByRole('button', { name: 'Find my order' }).click()
-  await expect(page.getByRole('region', { name: 'Order ORD-1001' })).toBeVisible()
+  await expect(page.getByRole('article', { name: 'Order ORD-1001' })).toBeVisible()
   const end = await page.evaluate(() => performance.now())
 
   expect(end - start).toBeLessThan(1000)

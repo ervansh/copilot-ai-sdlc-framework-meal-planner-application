@@ -8,11 +8,11 @@ Source Reference: ORD-4
 
 ## Plan Status
 
-**Implementation Plan Status: PENDING HUMAN APPROVAL**
+**Implementation Plan Status: APPROVED**
 
 **Approval Evidence:**
-- Human approval for the implementation plan has not been recorded yet.
-- This plan is ready for explicit human approval before any task moves into implementation.
+- The human explicitly approved the implementation plan earlier in this conversation on 2026-10-23.
+- This approval authorizes the plan to proceed; it does not accept any implementation task.
 
 This plan is based on:
 
@@ -35,7 +35,7 @@ This plan is based on:
 IMP-001 -> IMP-002 -> IMP-003 -> IMP-004
 ```
 
-Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `BLOCKED` until all of their declared dependencies are done.
+IMP-001 through IMP-004 are `DONE` after explicit human acceptance. IMP-004's readiness checks passed and its acceptance was recorded on 2026-10-23.
 
 ## Tasks
 
@@ -43,7 +43,7 @@ Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `
 
 - **Objective:** Create the minimal customer-safe summary model and transformation contract for the approved order-summary story.
 - **Priority:** P0
-- **Status:** IMPLEMENTED — PENDING HUMAN ACCEPTANCE
+- **Status:** DONE
 - **Dependencies:** None
 - **Requirement traceability:** FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, FR-008, FR-009, FR-010, FR-011, FR-012, FR-013; NFR-001, NFR-002, NFR-003; AC-001 through AC-007
 - **Architecture references:** Sections 5, 6, 7, 8, 9, 15
@@ -69,7 +69,7 @@ Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `
 
 - **Objective:** Render the approved order-summary sections in a single customer-facing page with the primary status kept prominent and distinct from shipment/delivery details.
 - **Priority:** P0
-- **Status:** BLOCKED
+- **Status:** DONE
 - **Dependencies:** IMP-001
 - **Requirement traceability:** FR-001, FR-004, FR-005, FR-006, FR-007, FR-008, FR-009, FR-010, FR-013; NFR-001, NFR-003; AC-002, AC-005, AC-006, AC-007
 - **Architecture references:** Sections 5, 7, 8, 11, 12, 15
@@ -95,7 +95,8 @@ Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `
 
 - **Objective:** Validate the story’s acceptance criteria with targeted unit, component, and accessibility checks before broad implementation completion.
 - **Priority:** P0
-- **Status:** BLOCKED
+- **Status:** DONE
+- **Acceptance evidence:** The human explicitly accepted the targeted browser-test locator rework on 2026-10-23. The earlier IMP-003 acceptance remains historical; this acceptance covers the new rework.
 - **Dependencies:** IMP-002
 - **Requirement traceability:** FR-001 through FR-013; NFR-001 through NFR-003; AC-001 through AC-007
 - **Architecture references:** Sections 8, 12, 15
@@ -114,12 +115,14 @@ Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `
 - **Risks/notes:**
   - Avoid mock-only assertions that do not validate the real rendered behavior.
   - Keep regressions tied to the explicit story acceptance criteria.
+  - Targeted rework aligns browser assertions with the existing named `article` summary semantics and verifies that no named summary article appears on unsuccessful lookup.
 
 ### IMP-004 — Run implementation regression and readiness checks
 
 - **Objective:** Confirm the order-summary implementation is buildable, testable, and ready for independent review without creating review or verification artifacts.
 - **Priority:** P1
-- **Status:** BLOCKED
+- **Status:** DONE
+- **Acceptance evidence:** The human explicitly accepted IMP-004 on 2026-10-23; acceptance is recorded in `order-tracking/docs/sdlc/implementation-log.md`.
 - **Dependencies:** IMP-003
 - **Requirement traceability:** FR-001 through FR-013; NFR-001 through NFR-003; AC-001 through AC-007
 - **Architecture references:** Sections 4, 10, 11, 12, 13, 15
@@ -135,6 +138,7 @@ Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `
   - The implementation is ready for independent review and final verification.
 - **Risks/notes:**
   - This is an implementation-stage checkpoint only; Code Review and Final Verification are separate lifecycle gates.
+  - IMP-003 targeted rework is accepted and DONE; IMP-004 readiness checks and explicit human acceptance are complete.
 
 ## Acceptance and Handoff Rules
 
@@ -148,5 +152,10 @@ Only IMP-001 is `READY` at plan creation. IMP-002, IMP-003, and IMP-004 remain `
 - Requirements gate checked: `order-tracking/docs/sdlc/requirements.md` reports `Requirements Status: APPROVED`.
 - Architecture gate checked: `order-tracking/docs/sdlc/architecture.md` reports `Architecture Status: APPROVED`.
 - Design review gate checked: `order-tracking/docs/sdlc/design-review.md` reports `Review Outcome: PASS` and `Architecture Approval Gate: ALLOWED`.
-- Current plan status: `Implementation Plan Status: PENDING HUMAN APPROVAL`.
-- Dependency ordering check: `IMP-001` is `READY`; `IMP-002`, `IMP-003`, and `IMP-004` are `BLOCKED` because they depend on previously incomplete tasks.
+- Current plan status: `Implementation Plan Status: APPROVED`, based on explicit human approval recorded above.
+- Dependency ordering check: `IMP-001`, `IMP-002`, and IMP-003 (including the accepted targeted rework) are `DONE`; IMP-004 was `READY` before implementation and is now `DONE` after explicit acceptance.
+- Acceptance evidence: Human acceptance for `IMP-002` was explicitly provided on 2026-10-23 and recorded in `order-tracking/docs/sdlc/implementation-log.md`.
+- Fresh IMP-004 readiness checks on 2026-10-23: `npm --prefix order-tracking test` passed (4 files, 17 tests); `npm --prefix order-tracking run test:browser` passed (5 tests); `npm --prefix order-tracking run typecheck` passed with no diagnostics; `npm --prefix order-tracking run build` passed.
+- Scope and hygiene checks on 2026-10-23: `git diff --check -- order-tracking` passed; the Order Tracking source/test diff was reviewed and no lookup, persistence, authentication, or security behavior was added by this readiness run; `git status --short --untracked-files=all -- order-tracking` showed no generated build output. This run changed only this plan and the implementation log. Code Review and Final Verification artifacts were not modified.
+- The earlier browser locator failure is historical and was resolved by the explicitly accepted IMP-003 targeted rework; the fresh full browser suite now passes.
+- All approved implementation tasks, `IMP-001` through `IMP-004`, are `DONE`. The implementation entry gate for independent Code Review is satisfied; Code Review is now eligible and remains a separate specialist stage.

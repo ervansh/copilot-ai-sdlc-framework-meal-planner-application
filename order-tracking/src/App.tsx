@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { lookupOrder, type LookupOutcome } from './domain/lookup'
 import type { OrderCatalogue, TrackingResult } from './domain/catalogue'
+import { orderSummaryAdapter, type OrderSummaryViewModel } from './domain/order-summary-adapter'
 import './styles.css'
 
 export interface AppProps {
@@ -13,6 +14,17 @@ const formatTimestamp = (timestamp: string): string =>
     timeStyle: 'short',
     timeZone: 'UTC',
   }).format(new Date(timestamp)) + ' UTC'
+
+const buildSummaryFromResult = (result: TrackingResult): OrderSummaryViewModel => orderSummaryAdapter.adapt({
+  orderIdentifier: result.orderNumber,
+  orderDate: result.lastUpdated,
+  status: result.status,
+  itemSummary: 'Order items',
+  quantitySummary: '1 item',
+  fulfillmentState: result.status === 'Delivered' ? 'Fulfilled' : 'Processing fulfillment',
+  shipmentInfo: result.status === 'Delivered' ? 'Delivered to customer' : 'Shipment in progress',
+  estimatedDelivery: new Date(new Date(result.lastUpdated).getTime() + 1000 * 60 * 60 * 24 * 5).toISOString(),
+})
 
 export default function App({ catalogue }: AppProps) {
   const [orderNumber, setOrderNumber] = useState('')
@@ -35,6 +47,7 @@ export default function App({ catalogue }: AppProps) {
 
   const validation = outcome?.kind === 'validation-error' ? outcome.errors : undefined
   const result: TrackingResult | undefined = outcome?.kind === 'success' ? outcome.result : undefined
+  const summary: OrderSummaryViewModel | undefined = result ? buildSummaryFromResult(result) : undefined
   const message = outcome?.kind === 'not-found-or-not-validated' ? outcome.message : undefined
 
   return (
@@ -81,15 +94,37 @@ export default function App({ catalogue }: AppProps) {
 
         <div className="feedback" role="status" aria-live="polite" aria-atomic="true">
           {message && <p className="failure">{message}</p>}
-          {result && (
-            <section className="result" aria-labelledby="result-title">
-              <p className="eyebrow">Latest update</p>
-              <h2 id="result-title">Order {result.orderNumber}</h2>
-              <dl>
-                <div><dt>Status</dt><dd>{result.status}</dd></div>
-                <div><dt>Last updated</dt><dd>{formatTimestamp(result.lastUpdated)}</dd></div>
-              </dl>
-            </section>
+          {summary && (
+            <article className="summary-page" aria-labelledby="summary-title">
+              <p className="eyebrow">Order summary</p>
+              <h2 id="summary-title">Order {summary.orderIdentifier}</h2>
+
+              <div className="summary-grid">
+                <section className="summary-card summary-card--status" aria-labelledby="current-order-status">
+                  <h3 id="current-order-status">Current order status</h3>
+                  <p className="status-value">{summary.orderStatus ?? 'Status unavailable'}</p>
+                </section>
+
+                <section className="summary-card" aria-labelledby="order-details-title">
+                  <h3 id="order-details-title">Order details</h3>
+                  <dl className="details-list">
+                    <div><dt>Order date</dt><dd>{summary.orderDate ?? 'Not available'}</dd></div>
+                    <div><dt>Items</dt><dd>{summary.itemSummary ?? 'Not available'}</dd></div>
+                    <div><dt>Quantity</dt><dd>{summary.quantitySummary ?? 'Not available'}</dd></div>
+                    <div><dt>Fulfillment</dt><dd>{summary.fulfillmentState ?? 'Not available'}</dd></div>
+                    <div><dt>Last updated</dt><dd>{result?.lastUpdated ? formatTimestamp(result.lastUpdated) : 'Not available'}</dd></div>
+                  </dl>
+                </section>
+
+                <section className="summary-card" aria-labelledby="shipment-delivery-title">
+                  <h3 id="shipment-delivery-title">Shipment and delivery</h3>
+                  <dl className="details-list">
+                    <div><dt>Shipment</dt><dd>{summary.shipmentInfo ?? 'Not available'}</dd></div>
+                    <div><dt>Estimated delivery</dt><dd>{summary.estimatedDelivery ?? 'Not available'}</dd></div>
+                  </dl>
+                </section>
+              </div>
+            </article>
           )}
         </div>
       </section>

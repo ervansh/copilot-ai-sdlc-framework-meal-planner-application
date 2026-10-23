@@ -2,15 +2,15 @@
 
 Application: Order Tracking
 Application Root: order-tracking
-Run Mode: START
+Run Mode: RESUME
 Source Type: JIRA
 Source Reference: ORD-4
-Requirements Status: APPROVED
+Requirements Status: CLARIFICATION REQUIRED
 
 ## Approval Evidence
 
 - Human approval for the Requirements stage was explicitly provided on 2026-10-23.
-- This approved requirement set is the source of truth for the story and is ready to enter Architecture.
+- Downstream feasibility review identified a material data-authority gap (CR-001). The prior approval is retained as historical evidence; the requirements are reopened pending clarification.
 
 ## Provenance
 
@@ -20,6 +20,7 @@ Requirements Status: APPROVED
 - Project: Order Tracking (`ORD`)
 - Dependency: ORD-101 — Track an Order.
 - Retrieved through the authorized Jira/MCP issue retrieval capability on 2026-10-23.
+- The Jira description and acceptance criteria identify no authoritative data source, order-summary data contract, or guarantee that the requested order fields are present in the order record.
 - Confluence publication: Not requested (`NO`).
 
 ## Explicit Source Facts
@@ -38,7 +39,10 @@ Requirements Status: APPROVED
 
 ## Clarification Decision Log
 
-No blocking clarification questions are required for this source. The Jira story contains sufficient explicit product requirements and acceptance criteria to proceed to human approval without material ambiguity.
+- Q-001 (OPEN): What is the authoritative source and data contract for the order-summary fields, especially item identity and quantity required by AC-003, as well as order date, fulfillment state, shipment, and delivery details? State whether each field is supplied by the already-identified order from ORD-101 or name the authoritative source and its field/availability guarantees. Do not derive or synthesize unavailable order facts.
+- Q-002 (OPEN): If the authoritative source does not provide item identity and quantity for an identified order, must AC-003 still be met by extending/changing that source, or should the requirement and acceptance behavior be revised to allow those values to be omitted? Also confirm which of order date, fulfillment, shipment, and delivery are optional when unavailable, consistent with AC-004.
+
+Downstream finding CR-001: the current lookup/catalogue record contains only order number, status, and last-updated timestamp. The implementation had synthesized or inferred other details, which the approved architecture prohibits. Jira ORD-4 does not resolve the data authority or the feasibility of AC-003 from that record.
 
 ## Functional Requirements
 
@@ -78,6 +82,6 @@ In scope is the customer-facing order summary view after a successful order look
 
 ## Open Questions
 
-None. No material product decision remains unresolved in the source story.
+- Q-001 and Q-002 above are material product decisions. Requirements approval remains blocked until they are answered.
 
-Requirements Status: APPROVED.
+Requirements Status: CLARIFICATION REQUIRED.

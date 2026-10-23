@@ -29,14 +29,22 @@ describe('order summary view model', () => {
   it('gracefully ignores missing optional values without breaking the summary', () => {
     const summary = adaptOrderToSummary({
       orderIdentifier: 'ORD-2049',
-      status: 'DELIVERED',
-      itemSummary: 'Mechanical keyboard',
+      orderDate: null,
+      status: null,
+      items: null,
+      itemSummary: null,
+      quantitySummary: null,
+      fulfillmentState: null,
+      shipmentInfo: null,
+      estimatedDelivery: null,
     })
 
     expect(summary.orderIdentifier).toBe('ORD-2049')
-    expect(summary.orderStatus).toBe('Delivered')
-    expect(summary.itemSummary).toBe('Mechanical keyboard')
     expect(summary.orderDate).toBeUndefined()
+    expect(summary.orderStatus).toBeUndefined()
+    expect(summary.itemSummary).toBeUndefined()
+    expect(summary.quantitySummary).toBeUndefined()
+    expect(summary.fulfillmentState).toBeUndefined()
     expect(summary.shipmentInfo).toBeUndefined()
     expect(summary.estimatedDelivery).toBeUndefined()
   })
