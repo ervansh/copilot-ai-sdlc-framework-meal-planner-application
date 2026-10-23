@@ -10,8 +10,9 @@ tools: ["read", "search", "edit"]
 
 Follow `.github/copilot-instructions.md`.
 
-Read requirements.md, architecture.md, and design-review.md under `<application-root>/docs/sdlc/`.
-Own only `<application-root>/docs/sdlc/impl-plan.md`.
+Require `SDLC Artifact Directory` from the orchestrator.
+Read requirements.md, architecture.md, and design-review.md under that directory.
+Own only `<SDLC Artifact Directory>/impl-plan.md`.
 
 ## Entry Gates
 
@@ -59,7 +60,7 @@ Do not implement tasks.
 
 ## Canonical Path Safety
 
-Write directly to `<application-root>/docs/sdlc/impl-plan.md`.
+Write directly to `<SDLC Artifact Directory>/impl-plan.md`.
 
 ## Task State Transition Invariants
 

@@ -8,9 +8,12 @@ Publish or update the human-readable Confluence documentation package for this s
 Application: ${input:application}
 Application Root: ${input:applicationRoot}
 Story ID / Source Reference: ${input:storyId}
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 Confluence Space: ${input:confluenceSpace}
 
-Treat repository SDLC artifacts under `<application-root>/docs/sdlc/` as authoritative.
+Treat repository SDLC artifacts under the supplied `SDLC Artifact Directory`
+as authoritative for managed stories; otherwise use
+`<application-root>/docs/sdlc/`.
 
 This is a documentation publication task only:
 - do not change SDLC lifecycle state

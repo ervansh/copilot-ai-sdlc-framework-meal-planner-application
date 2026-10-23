@@ -38,7 +38,7 @@ Hook = DETERMINISTIC EVENT AUTOMATION
 MCP = EXTERNAL SYSTEMS
 
 ---
-
+publish-story-documentation.prompt.md
 # 1. Custom Instructions
 
 ## Purpose
@@ -158,8 +158,15 @@ Implement one approved IMP task.
 
 Boundary:
 
-Must not redesign architecture.
-
+user-story-documenter.agent.md
+solution-architect.agent.md
+design-reviewer.agent.md
+implementation-planner.agent.md
+implementation-engineer.agent.md
+code-reviewer.agent.md
+verification-engineer.agent.md
+pr-preparer.agent.md
+framework-docs-maintainer.agent.md
 Gate:
 
 Implementation Plan must be approved.
@@ -510,22 +517,22 @@ Agents should know which artifact owns each lifecycle decision.
 Example:
 
 Requirements Approval
-→ requirements.md
+→ `<SDLC Artifact Directory>/requirements.md`
 
 Architecture Approval
-→ architecture.md
+→ `<SDLC Artifact Directory>/architecture.md`
 
 Design Review Outcome
-→ design-review.md
+→ `<SDLC Artifact Directory>/design-review.md`
 
 Implementation Plan Approval
-→ impl-plan.md
+→ `<SDLC Artifact Directory>/impl-plan.md`
 
 Code Review Outcome
-→ code-review.md
+→ `<SDLC Artifact Directory>/code-review.md`
 
 Final Verification Outcome
-→ verification.md
+→ `<SDLC Artifact Directory>/verification.md`
 
 This avoids accidentally interpreting historical metadata as current state.
 
@@ -770,6 +777,7 @@ sdlc-final-verification.prompt.md
 sdlc-pr-preparation.prompt.md
 
 sdlc-orchestrate.prompt.md
+
 publish-story-documentation.prompt.md
 
 ## Hooks

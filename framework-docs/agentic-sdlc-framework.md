@@ -91,7 +91,11 @@ user explicitly answers them.
 
 When the requirements are finalized, they are written to:
 
-- `<application-root>/docs/sdlc/requirements.md`
+- `<SDLC Artifact Directory>/requirements.md`
+
+For application-level runs without a Story ID, `SDLC Artifact Directory` is
+`<application-root>/docs/sdlc/`. For managed story runs, it is
+`<application-root>/docs/sdlc/stories/<story-id>/`.
 
 and remain in `PENDING APPROVAL` until a human explicitly approves them.
 
@@ -151,6 +155,23 @@ Examples:
 
 This allows another Copilot session or human reviewer to understand the current
 state without relying on previous conversations.
+
+## Story Work Sessions
+
+The SDLC Orchestrator accepts `Session Action: START | RESUME | LIST` to manage
+story worktrees. Session Action selects the repository context; `Run Mode:
+START | RESUME` independently controls lifecycle processing. A stable Story ID
+and Application Root identify each worktree. New worktrees are created from an
+explicit local integration branch.
+
+Managed story artifacts use
+`<application-root>/docs/sdlc/stories/<story-id>/`; the existing
+`<application-root>/docs/sdlc/` layout remains for non-managed runs. The
+orchestrator stops with the target path when a workspace switch is required.
+The user opens that worktree and reruns orchestration, which then continues the
+lifecycle using only that story's artifacts. Session discovery comes from Git
+worktrees, not a separate registry. Worktrees are not automatically cleaned up,
+and a Copilot Chat transcript is not restored.
 
 ## 7. Confluence Story Documentation Is Distinct From Requirements
 
@@ -315,7 +336,7 @@ governance.
 
 # Lifecycle Artifacts
 
-Each application uses these artifacts:
+Non-managed application runs use these artifacts:
 
 <application-root>/docs/sdlc/
 ├── requirements.md
@@ -329,6 +350,11 @@ Each application uses these artifacts:
 
 Each artifact has a specific responsibility.
 
+For a managed story run, resolve `SDLC Artifact Directory` to
+`<application-root>/docs/sdlc/stories/<story-id>/` and place the same artifact
+set there. The orchestrator passes that directory to each specialist. Existing
+application-level paths remain unchanged when no Story ID is supplied.
+
 ---
 
 # Source-of-Truth Rules
@@ -336,6 +362,10 @@ Each artifact has a specific responsibility.
 A critical framework rule is:
 
 Lifecycle fields must be evaluated from the artifact that owns them.
+
+Paths below show the non-managed application-level default. For a managed
+story, replace the `<application-root>/docs/sdlc/` prefix with that run's
+`SDLC Artifact Directory`.
 
 Do not use every artifact as an authority for every lifecycle state.
 
@@ -796,8 +826,9 @@ Pull Request Preparer
 
 - CHANGELOG.md
 - pull-request.md
-- Git commit/push when environment permits
-- GitHub Pull Request when environment permits
+- Git commit and push after explicit per-run human approval
+- verified GitHub Pull Request created through the configured GitHub MCP server
+- prepared-but-blocked status with the reason when Git or MCP prerequisites fail
 
 ## Required PR Sections
 
@@ -808,6 +839,51 @@ Pull Request Preparer
 - Reviewer Checklist
 
 The PR Preparer must not merge the pull request.
+
+Before any PR-related commit, push, or remote creation, the preparer presents
+the exact changes, remote, head/base branches, title, and body for explicit
+human approval. Git handles local operations; GitHub MCP handles remote PR
+lookup, creation, and read-back verification. Git push authentication is
+separate from GitHub MCP authentication. The preparer does not switch branches,
+discard unrelated work, use direct REST calls, or claim success without
+verifying the created PR.
+
+## GitHub MCP and Git Prerequisites
+
+The repository ignores `mcp.json` to keep workspace-specific server settings
+and credentials out of version control. Merge this server entry into your local
+`.vscode/mcp.json` `servers` object, preserving any existing servers such as
+Atlassian:
+
+```json
+{
+    "github": {
+        "type": "http",
+        "url": "https://api.githubcopilot.com/mcp/",
+        "headers": {
+            "X-MCP-Toolsets": "repos,pull_requests"
+        }
+    }
+}
+```
+
+When VS Code starts the server, review its trust prompt and complete the GitHub
+sign-in flow. Do not add a personal access token to tracked configuration or
+chat.
+
+Before attempting a PR run, verify that:
+
+- the GitHub MCP server starts and can perform a low-impact repository read
+- the local repository has the intended GitHub remote and a non-default feature
+    branch with the changes to propose
+- Git push authentication is configured independently of GitHub MCP sign-in
+- the user can push the branch and has permission to create a PR in the target
+    repository
+
+If any prerequisite is unavailable, prepare the artifacts and report the
+specific blocker. Configuration alone is not evidence that OAuth, push, or PR
+creation works; verify each operation in the intended environment before
+reporting success.
 
 ---
 

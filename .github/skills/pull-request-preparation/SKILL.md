@@ -10,7 +10,7 @@ Entry gate: verification permits PR preparation.
 Write:
 
 - `<application-root>/CHANGELOG.md`
-- `<application-root>/docs/sdlc/pull-request.md`
+- `<SDLC Artifact Directory>/pull-request.md`
 
 PR description must include:
 
@@ -21,5 +21,32 @@ PR description must include:
 - Reviewer Checklist
 
 Inspect Git/remote/gh state before claiming commit, push, or PR creation.
+
+## Safe GitHub PR Workflow
+
+1. Confirm the active application's final verification permits PR preparation.
+2. Inspect the repository root, current branch, base branch, remote, worktree,
+   staged and unstaged diffs, and any existing PR for the head branch.
+3. In a managed story session, remain in that story's selected worktree and
+   branch. Never switch branches, discard work, or stage unrelated changes.
+   If the branch is the default branch or the correct base/remote is ambiguous,
+   stop and ask the human to resolve it.
+4. Prepare the changelog and PR artifact with actual verification evidence.
+5. Present the exact files/diff, proposed commit message, remote, head/base,
+   PR title, and complete PR body. Request one explicit per-run approval before
+   staging/committing PR changes, pushing, or creating the PR.
+6. After approval, use Git for local commit and push. Recheck through GitHub
+   MCP for an existing PR immediately before creation to avoid a concurrent
+   duplicate. Use MCP for remote lookup, creation, and read-back verification.
+   Do not use direct HTTP, configuration-file credentials, or an unapproved
+   CLI fallback.
+7. If an equivalent PR already exists, report its verified URL and status;
+   do not create a duplicate.
+8. Verify the created PR's repository, URL, head, base, and open state before
+   reporting `PULL REQUEST CREATED — READY FOR HUMAN REVIEW`.
+
+Git push authentication and GitHub MCP authentication are separate. If either
+is missing or a remote operation fails, report the specific blocker and use
+`PULL REQUEST PREPARED — REMOTE CREATION BLOCKED`.
 
 Never force push or merge.

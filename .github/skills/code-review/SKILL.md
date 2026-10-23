@@ -11,7 +11,7 @@ Evaluate correctness, architecture, error handling, security, tests, maintainabi
 
 Write only:
 
-`<application-root>/docs/sdlc/code-review.md`
+`<SDLC Artifact Directory>/code-review.md`
 
 Use `CR-###` findings.
 

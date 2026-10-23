@@ -7,6 +7,8 @@ Provide explicit chat text:
 ```text
 Application: <name>
 Application Root: <application-root>
+Story ID: <stable-story-id, when managed>
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 Task ID: IMP-###
 ```
 

@@ -7,7 +7,10 @@ Provide:
 ```text
 Application: <name>
 Application Root: <application-root>
-Run Mode: <START | RESUME>
+Session Action: <START | RESUME | LIST, optional>
+Story ID: <stable-story-id, required for managed START/RESUME, omitted for LIST>
+Integration Branch: <local-branch, required for Session Action START>
+Run Mode: <START | RESUME, required for lifecycle work but not LIST>
 Source Type: <JIRA | CONFLUENCE | WORD>
 Source Reference: <reference>
 Publish User Story to Confluence: <YES | NO>
@@ -26,6 +29,7 @@ Mandatory orchestration rules:
 8. Code Review and Final Verification remain independent lifecycle stages.
 9. External Jira/Confluence access must use MCP rather than direct credential-based REST calls.
 10. Never merge the PR.
+11. For managed story runs, use only `.github/scripts/story-sessions.mjs` for session actions. If the target worktree is not open, report its path and stop; after the user opens it and reruns the request, continue lifecycle work there. Use `docs/sdlc/stories/<story-id>/` for managed story artifacts and ignore legacy root SDLC artifacts for that story.
 
 At every transition report:
 

@@ -37,6 +37,9 @@ When Requirements Analysis begins from an external source, also establish:
 When orchestration is used, also establish:
 
 - `Run Mode: <START | RESUME>`
+- `Session Action: <START | RESUME | LIST>` when managing a story worktree
+- `Story ID` for managed `START` and `RESUME` actions; not required for `LIST`
+- `Integration Branch` for a new managed story worktree
 
 The explicitly supplied Application Root is authoritative for the run.
 
@@ -52,6 +55,32 @@ Source Reference: ORD-101
 
 Do not choose another application merely because its directory already exists.
 
+## Story Session Isolation
+
+Story sessions are optional developer work contexts for switching between
+stories within an application. They are separate from Copilot Chat sessions
+and application runtime sessions.
+
+When using session actions through `sdlc-orchestrate`:
+
+- identify a session by `Application Root` plus a stable `Story ID`
+- use `Session Action` only for worktree selection and `Run Mode` only for
+  lifecycle state; do not treat them as interchangeable
+- isolate each story's code in its own Git branch and worktree
+- store managed story artifacts under
+  `<application-root>/docs/sdlc/stories/<story-id>/`
+- create a new story worktree from an explicitly supplied integration branch;
+  never infer its base from another unfinished story
+- discover sessions from Git worktrees; do not create a separate session
+  registry or lifecycle state file
+- keep lifecycle state authoritative in that story's artifact directory
+- when the selected worktree is not open, report its path and stop; after the
+  user opens it in VS Code and reruns orchestration, continue there
+- do not automatically reset, merge, prune, delete, or clean up story work
+
+Story session selection restores repository/workflow context, not a Copilot
+Chat transcript. Story worktrees are local to a Git clone.
+
 ## Application Path Invariants
 
 For the active application:
@@ -59,10 +88,17 @@ For the active application:
 - Application root: `<application-root>/`
 - Source: `<application-root>/src/`
 - Tests: `<application-root>/tests/`
-- SDLC artifacts: `<application-root>/docs/sdlc/`
+- SDLC artifacts: `<application-root>/docs/sdlc/` for application-level runs;
+  `<application-root>/docs/sdlc/stories/<story-id>/` for managed story runs
 - Changelog: `<application-root>/CHANGELOG.md`
 
 Never abbreviate these to repository-root `src/`, `tests/`, or `docs/sdlc/` unless the user explicitly declares the repository root itself as the Application Root.
+
+Resolve `SDLC Artifact Directory` as
+`<application-root>/docs/sdlc/stories/<story-id>/` when a Story ID is supplied
+for a managed session; otherwise use `<application-root>/docs/sdlc/`. The
+orchestrator passes this resolved path to every specialist. Direct specialist
+prompts must provide the same value.
 
 ## New Application Rule
 
@@ -70,13 +106,17 @@ For `Run Mode: START`, the Application Root is allowed not to exist yet.
 
 The absence of `<application-root>/` is not a blocker.
 
-Requirements Analysis may create `<application-root>/docs/sdlc/` when it is ready to write the requirements artifact.
+Requirements Analysis may create the run's `SDLC Artifact Directory` when it
+is ready to write the requirements artifact. For managed story runs, this is
+`<application-root>/docs/sdlc/stories/<story-id>/`.
 
 Implementation may later create source and test directories according to the approved architecture and implementation plan.
 
 ## Existing Application / Resume Rule
 
-For `Run Mode: RESUME`, determine lifecycle state only from the selected Application Root.
+For `Run Mode: RESUME`, determine lifecycle state only from the selected
+`SDLC Artifact Directory`. For managed story runs, ignore legacy or other
+story artifacts outside `<application-root>/docs/sdlc/stories/<story-id>/`.
 
 Do not use another application's artifacts to infer status.
 
@@ -157,11 +197,14 @@ Before requirements approval, requirement authority consists of:
 - the authoritative source artifact
 - explicit human clarification decisions
 
-After human Requirements Approval:
+After human Requirements Approval in a non-managed application run:
 
 `<application-root>/docs/sdlc/requirements.md`
 
 becomes the authoritative downstream requirements contract for that application.
+
+For a managed story run, the same ownership applies to
+`<SDLC Artifact Directory>/requirements.md` for that Story ID.
 
 Requirements Approval alone is sufficient to enter Architecture.
 
@@ -184,7 +227,9 @@ Material `INFERRED`, `ASSUMED`, `UNRESOLVED`, or `CONFLICTING` items must be res
 
 ## Artifact Ownership
 
-Authoritative artifact ownership:
+Authoritative artifact ownership. For managed story runs, replace the
+`<application-root>/docs/sdlc/` prefix below with the supplied
+`SDLC Artifact Directory`:
 
 - Requirements Approval: `<application-root>/docs/sdlc/requirements.md`
 - Architecture Approval: `<application-root>/docs/sdlc/architecture.md`
@@ -327,6 +372,10 @@ When an external system is configured through MCP:
 - do not read API tokens or passwords from configuration files
 - do not construct direct REST/HTTP calls using discovered credentials
 - do not bypass an unavailable MCP capability with ad hoc credential use
+- for GitHub pull requests, use Git for local branch/commit/push operations and the configured GitHub MCP server for remote PR operations
+- require explicit per-run human approval after previewing the exact commit contents and PR details, before staging/committing PR changes, pushing, or creating a PR
+- treat Git push authentication and GitHub MCP authentication as separate prerequisites; never store credentials in tracked configuration
+- verify any created PR by reading it back through GitHub MCP before reporting success
 
 If the required MCP tool is unavailable, report a source/tool blocker.
 

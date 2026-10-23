@@ -4,257 +4,247 @@ Application: Order Tracking
 Application Root: order-tracking  
 Run Mode: START  
 Source Type: JIRA  
-Source Reference: ORD-3  
+Source Reference: ORD-4  
 Architecture Status: APPROVED
+
+## Approval Evidence
+
+- Human approval for the Architecture stage was explicitly provided on 2026-10-23.
+- This approved architecture is the source of truth for the order-summary story and is ready to proceed to Implementation Planning.
 
 ## 1. Architecture Context
 
-This architecture implements the approved requirements for the ORD-3 guest order lookup story. The local bundled mock order catalogue is the authoritative data source for this MVP. No authentication, server, external order-management integration, or backend security control is introduced by this design.
+This architecture covers the approved order-summary story for a successfully identified order. The product requirement is customer-facing presentation of the order summary after the order has already been identified, not a new login, lookup, or authentication flow.
 
-The architecture deliberately keeps the lookup boundary small: a customer submits two identifiers, a pure lookup service normalizes and matches them against one catalogue record, and the UI renders either the approved tracking fields or one generic failure outcome.
+The design therefore focuses on a single summary-view boundary: consume an already-identified order object, render the key order details in customer-readable form, keep the primary status visible without extra navigation, and degrade gracefully when optional fields are absent.
 
 ## 2. Architecture Drivers and Constraints
 
-- Required entry point: Order Number and Email Address are both required.
-- Lookup is unauthenticated guest access.
-- The catalogue is bundled locally and is authoritative for this MVP.
-- Both normalized identifiers must match the same catalogue record.
-- Failed lookups must be indistinguishable externally and must not expose order details.
-- Successful output is limited to order number, current status, and last updated timestamp.
-- Full customer name, full email address, phone number, postal address, and payment information must never be rendered.
-- Required-field validation must prevent lookup and associate understandable messages with the relevant fields.
-- Keyboard operation and standard accessible form semantics are required.
-- A normal local lookup must complete in under 1 second.
-- CAPTCHA, account lockout, alerting, audit logging, server-side rate limiting, authentication, persistence, and external outage handling are outside this story.
+- The summary page is shown only after a successful order identification step.
+- The page must clearly distinguish order-level status from shipment or delivery information.
+- The customer should not need to navigate through multiple pages to understand the primary status.
+- The summary must present: order identifier, order date, current order status, item or item summary, quantity information, fulfillment state, available shipment information, and available estimated delivery details.
+- Optional values must not cause the page to fail solely because a field is absent.
+- Sensitive customer information must not be exposed beyond what is required to understand the order.
+- Customer-readable labels and values must be used instead of internal system codes.
+- The most important information, especially the current status, must be understandable immediately.
+- The story explicitly excludes the order lookup flow, authentication requirements, and detailed shipment history.
 
 ## 3. Options and Tradeoffs
 
-### Option A: Frontend-only bundled catalogue (selected)
+### Option A: Single summary page rendering model (selected)
 
-Use a TypeScript browser application with a versioned catalogue module, a pure normalization/matching service, and a form/result UI. This is the simplest adequate implementation for the approved backendless MVP, has predictable local performance, and avoids introducing an unapproved data authority or authentication flow.
+Use a lightweight summary-rendering layer that receives an already-identified order model and renders an order-detail summary with clearly separated sections for order status and shipping/delivery information. This matches the approved requirement set, keeps the UI simple, and respects the requirement that the most important information remains visible without extra navigation.
 
-Tradeoff: catalogue contents are shipped to the browser and are not suitable for real-world confidential order data. The MVP privacy contract is therefore enforced by the lookup response and rendering boundary, while production-grade confidentiality remains outside this story.
+Tradeoff: it keeps the logic intentionally narrow and presentation-focused. The architecture does not add new data authority or backend behavior beyond the approved display contract.
 
-### Option B: Backend lookup service (not selected)
+### Option B: Multi-page status navigation (not selected)
 
-A backend could keep catalogue data away from the browser and provide stronger operational controls. It would add deployment, network, authentication/security, failure, and integration behavior that the approved requirements explicitly exclude.
+A multi-page or drill-down design would require additional navigation to see the key status. That conflicts with the requirement that primary status remain visible without extra navigation.
 
-### Option C: Persistent client storage (not selected)
+### Option C: Exposing raw internal codes and unfiltered data (not selected)
 
-Browser storage would add mutable state and a second data authority without a requirement for customer-created or updated orders. It would also complicate deterministic matching and privacy behavior.
+Rendering internal codes or exposing data outside the approved summary contract would fail the explicit requirement to use customer-readable labels and the prohibition on unnecessary sensitive exposure.
 
 ## 4. Technology Stack
 
-- TypeScript for domain types and application code.
-- React for the guest lookup form and tracking result view.
-- Vite for local development and a static production bundle.
-- Vitest and Testing Library for unit and component tests.
-- Playwright for keyboard and browser acceptance coverage.
-- Native HTML form controls and accessibility attributes; no third-party identity, network, or order-management dependency.
+- TypeScript for model and render logic.
+- React for the summary presentation layer.
+- Vite for local development and static distribution.
+- Testing Library and Vitest for unit and component validation.
+- Playwright for browser-level acceptance coverage.
+- Native HTML semantics and standard CSS for accessible, responsive layout.
 
-The stack is an implementation choice and does not alter the approved customer behavior.
+This stack is implementation-neutral with respect to the approved product behavior and is chosen to support a simple, testable summary page.
 
 ## 5. Component Boundaries and Responsibilities
 
-### Catalogue module
+### Order Summary Container
 
-Owns the bundled mock order records and their public domain shape. The module may expose records to the lookup service, but UI components must not read raw catalogue records directly.
+Owns page composition, selection of the summary layout, and orchestration of primary order information. It is responsible for ensuring the order-level status is surfaced prominently and that shipment/delivery details are distinct from the order state.
 
-### Lookup domain service
+### Order Summary Adapter
 
-Exposes a function equivalent to `lookupOrder(orderNumber, emailAddress)`. It:
+Transforms the already-identified order object into a customer-safe summary view model. This is the boundary where optional fields are normalized, missing values are treated as absent, and internal codes are converted into customer-readable display values.
 
-1. Normalizes the two inputs using the approved rules.
-2. Searches for one record where both normalized values match the same record.
-3. Returns a minimal public tracking result on success.
-4. Returns the same failure outcome for no match, partial match, or any other unsuccessful lookup.
+### Order Summary Panel
 
-The service must not return match diagnostics such as which field matched, whether an order number exists, or whether an email exists.
+Renders the visible sections:
 
-### Validation layer
+- Order identity and date
+- Current order status
+- Item and quantity summary
+- Fulfillment state
+- Shipment details when available
+- Estimated delivery details when available
 
-Runs before the domain lookup. It checks that both submitted values contain non-whitespace content, returns field-keyed messages, and prevents the domain service from running when either value is missing. It does not replace the approved normalization behavior: surrounding whitespace is tolerated for a non-empty value and removed before matching.
+This panel never invents missing order fields and never forces a hard failure when optional values are absent.
 
-### Guest lookup view
+### Status and Detail Sectioning
 
-Owns the labeled form, submit interaction, validation feedback, generic failure message, and successful result rendering. It consumes only the minimal public result from the lookup service and never renders raw customer or catalogue fields.
+Provides explicit separation between:
 
-### Application shell
+- order-level status
+- shipment information
+- delivery information
 
-Provides the page structure, document title, responsive layout, and status/result region. It has no data access or matching logic.
+This sectioning is a product requirement and should be reflected visually as well as structurally.
 
 ## 6. Data Model
 
-The internal catalogue record contains only fields needed to implement the approved flow and test fixture data:
+The architecture uses a minimal, customer-safe view model that reflects only the approved summary content:
 
 ```ts
-type OrderRecord = {
-  orderNumber: string;
-  emailAddress: string;
-  status: string;
-  lastUpdated: string; // ISO 8601 timestamp
+type OrderSummaryViewModel = {
+  orderIdentifier: string;
+  orderDate?: string;
+  orderStatus?: string;
+  itemSummary?: string;
+  quantitySummary?: string;
+  fulfillmentState?: string;
+  shipmentInfo?: string;
+  estimatedDelivery?: string;
 };
 ```
 
-The lookup service returns a separate public view model:
+This model intentionally omits data not required by the story and treats all summary fields as optional except the order identifier, which is required for a successfully identified order. A missing `shipmentInfo` or `estimatedDelivery` value should remove only that field from view output and leave the rest of the summary usable.
 
-```ts
-type TrackingResult = {
-  orderNumber: string;
-  status: string;
-  lastUpdated: string;
-};
-```
+No detailed customer profile, payment information, address data, or internal service codes are part of the approved summary contract.
 
-No customer name, phone, postal address, payment information, or full email address belongs in the public result model. A typed result union should distinguish `success`, `validation-error`, and `not-found-or-not-validated` without exposing match reason details.
+## 7. Required Display and Presentation Flow
 
-The catalogue is immutable at runtime, bundled with the application, and has no persistence lifecycle. Timestamp display should preserve the catalogue value and format it for readability without changing the underlying instant.
+1. An order has already been successfully identified upstream.
+2. The summary container receives the order record or summary-ready data.
+3. The adapter maps raw order details into the display view model while preserving only customer-safe and approved fields.
+4. The summary page renders the order identifier, order date, and current status first, keeping the primary status visible without extra navigation.
+5. Item and quantity fields are rendered as an identifiable order summary.
+6. Fulfillment and available shipment/delivery information are rendered in clearly distinct sections.
+7. Missing optional values do not block rendering of the rest of the summary.
 
-## 7. Normalization and Matching
+This is a presentation flow, not a new business logic flow. It must not introduce lookup, validation, or authentication semantics beyond the approved story.
 
-Normalization is deterministic and centralized in the lookup domain service:
+## 8. Validation and Error Handling
 
-- Order Number: trim leading and trailing whitespace, then compare case-insensitively.
-- Email Address: trim leading and trailing whitespace, then lowercase before comparison.
+This story does not define a new customer input validation flow. The architecture therefore limits validation to safe display behavior for a successfully identified order:
 
-The implementation should compare canonical normalized strings and must not apply additional product rules such as punctuation removal, email aliasing, Unicode folding, or order-number rewriting. A successful match requires both normalized values to match the same `OrderRecord`; two separate partial matches cannot produce success.
+- If required order information is missing from the upstream object, the page should fail gracefully by rendering only what is available and omitting unavailable details.
+- If a shipment or delivery value is absent, the page should continue to show the rest of the summary without a critical failure.
+- If a status value is not customer-readable, the UI should translate or label it appropriately rather than exposing internal codes.
+- The page should not depend on any optional field being present before the order status becomes visible.
 
-## 8. Request and Response Flow
+The implementation should prefer graceful degradation over a hard crash when optional values are absent.
 
-1. The customer focuses the Order Number and Email Address fields.
-2. Submit invokes native form handling and prevents navigation.
-3. The validation layer checks required values. If either is missing, no catalogue lookup occurs; field-associated errors are rendered and focus is moved or retained in a predictable accessible manner.
-4. For valid input, the lookup service normalizes both values and scans the bundled catalogue.
-5. On an exact same-record match, the service returns `TrackingResult`; the view renders order number, status, and last updated timestamp.
-6. On every unsuccessful match, the service returns one generic failure outcome; the view clears any previous result and renders no order details.
-7. A subsequent attempt replaces the prior outcome so a failed attempt cannot leave an earlier successful order visible.
+## 9. Privacy and Security Boundaries
 
-The UI must not log submitted identifiers or raw records to the console, analytics, URL, or browser storage.
+- The summary renders only required customer-visible order details.
+- Sensitive customer data that is not needed for the order summary is not rendered.
+- Internal codes are translated into understandable labels and values before presentation.
+- The page should prevent unnecessary leakage of hidden operational details or raw internal data.
+- The architecture does not define any additional identity, authentication, payment, or account-management behavior.
 
-## 9. Validation and Generic Failure Behavior
+## 10. Performance and Reliability
 
-Required-field validation is separate from failed lookup behavior. Missing values produce understandable messages associated with the exact missing field and prevent lookup. Once both fields contain non-whitespace content, all catalogue misses use the same customer-visible message, for example: `We could not validate those order details.` The final wording must remain generic and must not indicate which identifier was present or absent.
+The summary page is a primarily synchronous render of an already-identified order object. There is no requirement for a network round trip or external dependency within this story. The rendering should therefore remain simple and deterministic:
 
-On any failed lookup:
+- cheap conditional rendering
+- no unnecessary asynchronous data fetches
+- minimal layout churn
+- graceful handling of absent optional values
 
-- Do not render order number, status, timestamp, or any raw catalogue data.
-- Do not reveal whether either identifier exists.
-- Clear a previous successful result before displaying the generic failure state.
-- Keep the submitted field values available for correction unless a later approved requirement says otherwise.
+Because the story is presentation-focused, the primary reliability concern is resilient rendering rather than lookup or persistence logic.
 
-The service and component tests must assert identical failure results for nonexistent identifiers, one-field matches, and two-field mismatches.
+## 11. Accessibility and Responsive Behavior
 
-## 10. Privacy and Security Boundaries
+- Use semantic headings and sectioning for order, shipment, and delivery details.
+- Keep the current status in a prominent, early position in the page hierarchy.
+- Ensure the summary remains understandable without requiring the customer to navigate deeper into the page.
+- Use clear labels for order identifier, date, status, item summary, fulfillment, shipment, and delivery.
+- Preserve keyboard accessibility and screen-reader-friendly structure.
+- Keep the layout responsive and readable on both narrow and wide screens without horizontal scrolling or content overlap.
+- Do not rely on color alone to differentiate order status from shipment/delivery details.
 
-- Guest access is limited to the two required identifiers and the minimal approved tracking response.
-- The public result type and UI component boundary enforce data minimization by construction.
-- Raw catalogue records remain inside the catalogue/domain boundary and are not passed to presentation components.
-- No identifiers are placed in query parameters, local storage, session storage, logs, telemetry, or error text.
-- The application does not claim to provide server-side rate limiting, CAPTCHA, account lockout, alerting, or audit logging; these are explicitly out of scope for this backendless MVP.
-- Because the catalogue is bundled, fixture data must be non-sensitive mock data. Real customer data must not be substituted without a new requirements and architecture decision.
+## 12. Testing Strategy
 
-## 11. Performance and Reliability
+### Model and adapter tests
 
-The catalogue is loaded with the static application bundle, so lookup has no network round trip or external outage path. A linear scan is adequate for the MVP catalogue and should complete well below the one-second target for normal local lookup. The implementation should avoid asynchronous work in the lookup path unless required by the chosen bundling setup.
-
-The service is deterministic and side-effect free. An empty or malformed catalogue is an implementation/configuration failure, not a customer-visible match distinction; the UI should still fail generically rather than expose internal details. Build-time type checking and catalogue fixture validation should detect malformed records where practical.
-
-## 12. Accessibility and Responsive Behavior
-
-- Use a native `<form>` with visible `<label>` elements associated to both inputs.
-- Use native input and submit controls with meaningful accessible names.
-- Associate each required-field message with its input through `aria-describedby` and expose invalid state with `aria-invalid` only when invalid.
-- Provide a polite status/result region for success and generic failure updates without making the page unusable for screen readers.
-- Preserve logical keyboard order: Order Number, Email Address, submit, then result content.
-- Ensure focus indicators remain visible and error focus behavior does not trap the keyboard.
-- Keep the form and result readable on narrow and wide viewports without horizontal scrolling or overlapping content.
-- Do not rely on color alone for errors, status, or success.
-
-## 13. Testing Strategy
-
-### Domain unit tests
-
-- Required values are represented by the validation layer and missing values prevent lookup.
-- Order number trimming and case-insensitive comparison work.
-- Email trimming and lowercasing work.
-- Both identifiers must match one record.
-- Successful output contains only the three approved tracking fields.
-- No-match, partial-match, and mismatched-record cases return the same generic failure shape.
+- The order identifier is rendered exactly as the requested order.
+- Optional values can be omitted without breaking the rest of the view.
+- Internal or untranslated values are mapped to clearer customer-facing labels.
+- Shipment and delivery information remain separate from order status.
 
 ### Component tests
 
-- The form exposes visible labels and submits via keyboard.
-- Missing-field messages are visible and associated with the relevant fields.
-- Successful lookup renders only order number, status, and timestamp.
-- Failed lookup renders the generic message and no order details.
-- A failed subsequent attempt clears a previous successful result.
+- The summary page renders the order identifier, date, current status, item summary, and fulfillment state.
+- When shipment or delivery values are absent, the page continues to display the remaining information.
+- The order status is visually and structurally distinct from shipment/delivery details.
+- The page renders customer-readable status text instead of internal status codes.
 
 ### Browser acceptance tests
 
-Cover AC-001 through AC-007 in a real browser, including keyboard-only completion, whitespace/case normalization, privacy assertions against visible text, and timing of a normal local lookup. Use mock catalogue values that are clearly non-sensitive.
+- Verify the primary status is visible immediately after the order summary loads.
+- Verify order status is separated from shipment and delivery details.
+- Verify available shipment and estimated delivery information appears only when available.
+- Verify the page remains usable when optional details are absent.
+- Verify the customer can identify the items associated with the order.
 
-### Performance check
+## 13. Deployment and Operations
 
-Measure from submit to rendered success/failure state for a normal bundled lookup. Keep the assertion under the approved one-second threshold with enough tolerance to avoid environment noise while still detecting accidental network or blocking work.
+This story is a UI-level enhancement for an already identified order within the existing order-tracking application surface. No new runtime service, database, migration, or backend security boundary is introduced by the architecture.
 
-## 14. Deployment and Operations
+The summary page is deployed as part of the normal static application bundle and not as a separate operational service. Any order data source or integration used by the upstream order identification flow remains outside this story’s architecture unless a future requirements change adds it.
 
-Build a static asset bundle and serve it from the approved hosting mechanism for the application. No runtime service, database, secret, external integration, migration, or environment-specific order endpoint is required for ORD-3. Deployment must include the bundled catalogue and must not include real customer data.
+## 14. Architecture Decisions and Risks
 
-Operational controls named as out of scope by NFR-003 must not be represented as implemented capabilities. Future introduction of a backend or authoritative external source requires a requirements update and architecture review.
+### ADR-001: Keep summary presentation focused on the approved view model
 
-## 15. Architecture Decisions and Risks
+Decision: Render only the approved order summary fields and omit unrelated customer data.  
+Reason: The story requires display of summary details without exposing unnecessary sensitive information.  
+Consequence: Any new field or data exposure requires explicit product requirements review.
 
-### ADR-001: Use a bundled local catalogue
+### ADR-002: Gracefully omit optional details
 
-Decision: The catalogue module is the sole authority for MVP lookup.  
-Reason: This directly implements Q-002 and avoids unapproved external integration and outage behavior.  
-Consequence: Data is static and browser-delivered; only mock data is appropriate.
+Decision: Missing shipment, delivery, or fulfillment details do not block the page.  
+Reason: The requirements explicitly allow the page to continue displaying available information when optional data is absent.  
+Consequence: The UI must be designed to render partial data safely and predictably.
 
-### ADR-002: Separate internal records from public tracking results
+### ADR-003: Keep order status structurally separate from shipment and delivery
 
-Decision: The domain service maps an internal `OrderRecord` to a minimal `TrackingResult`.  
-Reason: This makes FR-006 and FR-007 enforceable at the type and component boundaries.  
-Consequence: Any future customer-visible field requires an explicit requirements decision.
+Decision: Distinct summary sections will present order status separately from shipment and delivery details.  
+Reason: This is a direct requirement for clarity and to reduce confusion.  
+Consequence: The layout and labels must intentionally preserve that distinction.
 
-### ADR-003: Return one failure outcome for all unsuccessful matches
+Primary risk: The architecture deliberately avoids inventing a specific backend or data contract. This is acceptable because the approved story is limited to summary display after successful order identification and does not require a new data authority or order-lookup workflow.
 
-Decision: No-match, partial-match, and mismatched-record cases share one externally visible failure behavior.  
-Reason: This implements Q-006 and prevents account/order enumeration.  
-Consequence: Diagnostic detail is available only in developer tests, not in the customer response.
-
-Primary risk: A frontend-only catalogue is not a production confidentiality boundary. This is accepted only for the approved local bundled mock MVP and is mitigated by non-sensitive fixtures and strict public-result mapping.
-
-## 16. Requirements Traceability
+## 15. Requirements Traceability
 
 | Requirement | Architectural response |
 |---|---|
-| FR-001 | Guest lookup view with required Order Number and Email Address fields; no authentication boundary. |
-| FR-002 | Separate required-field validation layer prevents domain lookup and renders field-associated errors. |
-| FR-003 | Centralized deterministic normalization rules in the lookup domain service. |
-| FR-004 | Same-record matching against the immutable bundled catalogue, the sole MVP authority. |
-| FR-005 | `TrackingResult` exposes and the result view renders order number, status, and last updated timestamp. |
-| FR-006 | Internal/public model separation and presentation boundary exclude prohibited personal and payment data. |
-| FR-007 | One generic failure union/message, no match diagnostics, and result clearing on failed attempts. |
-| FR-008 | Native form semantics, labels, descriptions, invalid state, keyboard order, focus, and status region. |
-| NFR-001 | Synchronous in-memory local lookup with browser performance coverage under one second. |
-| NFR-002 | Static frontend and bundled catalogue; no auth or external order-management integration. |
-| NFR-003 | No backend security controls are claimed or added; privacy behavior is limited to the approved MVP response contract. |
-| NFR-004 | No external dependency exists in the lookup flow, so source outage behavior is not applicable. |
-| AC-001 | Component and browser tests verify prevention and associated required-field feedback. |
-| AC-002 | Domain and browser tests verify permitted whitespace and case normalization plus successful minimal output. |
-| AC-003 | Failure tests verify generic message and absence of order details. |
-| AC-004 | Failure equivalence tests cover existence and partial-match variants. |
-| AC-005 | Public result and rendered-text assertions exclude all prohibited fields. |
-| AC-006 | Keyboard-only browser coverage verifies reach, fill, submit, and associated feedback. |
-| AC-007 | Normal local lookup performance test verifies the under-one-second target. |
+| FR-001 | Order Summary Container and Summary Panel render the approved order summary after successful identification. |
+| FR-002 | Summary adapter keeps the order identifier aligned with the requested order and displays it prominently. |
+| FR-003 | Order date is included in the summary model and rendered with the order metadata. |
+| FR-004 | Current order status is surfaced in a prominent, customer-readable section. |
+| FR-005 | Item summary and quantity information are displayed in the summary panel. |
+| FR-006 | Fulfillment status is included as a distinct order-level summary field. |
+| FR-007 | Shipment information is rendered in a dedicated section when available. |
+| FR-008 | Estimated delivery information is rendered in a dedicated section when available. |
+| FR-009 | Order status is visually and structurally distinguished from shipment and delivery details. |
+| FR-010 | Primary status is kept visible without requiring additional navigation. |
+| FR-011 | Summary model excludes unnecessary sensitive customer data and keeps the display contract minimal. |
+| FR-012 | Optional fields are treated as absent without causing a page failure. |
+| FR-013 | Customer-readable labels and values are used instead of internal codes. |
+| NFR-001 | The summary page prioritizes status and uses a simple, direct rendering flow. |
+| NFR-002 | The page remains usable when optional values are absent. |
+| NFR-003 | Order status and shipment/delivery details are separated to reduce confusion. |
+| AC-001 | Adapter and component tests ensure the correct order is displayed. |
+| AC-002 | Status is rendered in customer-readable form when known. |
+| AC-003 | Items and quantities are identifiable in the summary. |
+| AC-004 | Missing optional values do not cause the page to fail. |
+| AC-005 | Internal codes are not required for understanding the main status. |
+| AC-006 | Visual and structural separation between order status and shipment/delivery information is enforced. |
+| AC-007 | Primary status remains visible without extra navigation. |
 
-## 17. Approval State
+## 16. Architecture Status
 
 Architecture Status: APPROVED
 
-Approval Evidence:
-
-- Human decision: "approved"
-- Approval date: 2026-09-23
-- Independent Design Review outcome: PASS; Architecture Approval Gate: ALLOWED.
+This architecture has received explicit human approval and is the authoritative design contract for the approved order-summary story. The implementation plan may proceed in dependency order under this approved scope.

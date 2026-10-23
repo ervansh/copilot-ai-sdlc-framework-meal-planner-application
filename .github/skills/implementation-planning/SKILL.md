@@ -7,13 +7,13 @@ description: Dependency-ordered planning methodology for converting approved req
 
 Sources:
 
-- `<application-root>/docs/sdlc/requirements.md`
-- `<application-root>/docs/sdlc/architecture.md`
-- `<application-root>/docs/sdlc/design-review.md`
+- `<SDLC Artifact Directory>/requirements.md`
+- `<SDLC Artifact Directory>/architecture.md`
+- `<SDLC Artifact Directory>/design-review.md`
 
 Target:
 
-`<application-root>/docs/sdlc/impl-plan.md`
+`<SDLC Artifact Directory>/impl-plan.md`
 
 Create `IMP-###` tasks with objective, traceability, dependencies, priority, status, scope, tests, completion criteria, and risks.
 

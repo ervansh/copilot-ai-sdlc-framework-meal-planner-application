@@ -170,6 +170,12 @@ Hooks for deterministic execution-time policy.
 
 ## Testing
 
+Run the command-policy regression tests with:
+
+```text
+node --test .github/hooks/scripts/pre-tool-policy.test.mjs
+```
+
 When Copilot CLI or cloud agent is available, verify the hook behavior in a
 test branch or disposable repository first.
 

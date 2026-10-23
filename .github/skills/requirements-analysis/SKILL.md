@@ -5,7 +5,7 @@ description: Source-driven methodology that resolves material product ambiguity 
 
 # Requirements Analysis Skill
 
-Target: `<application-root>/docs/sdlc/requirements.md`
+Target: `<SDLC Artifact Directory>/requirements.md`
 
 ## Method
 

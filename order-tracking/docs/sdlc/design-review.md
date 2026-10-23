@@ -4,14 +4,14 @@ Application: Order Tracking
 Application Root: order-tracking  
 Run Mode: START  
 Source Type: JIRA  
-Source Reference: ORD-3  
+Source Reference: ORD-4  
 Reviewed artifacts:
 
 - `order-tracking/docs/sdlc/requirements.md` (`Requirements Status: APPROVED`)
-- `order-tracking/docs/sdlc/architecture.md` (`Architecture Status: DRAFT - PENDING HUMAN APPROVAL`)
+- `order-tracking/docs/sdlc/architecture.md` (`Architecture Status: DRAFT — PENDING DESIGN REVIEW`)
 
 Review type: Independent Design Review  
-Review date: 2026-09-23
+Review date: 2026-10-23
 
 ## Outcome
 
@@ -24,59 +24,43 @@ Human Architecture Approval remains required.
 
 ## Findings
 
-### DR-001 — OBSERVATION — Frontend catalogue is not a production confidentiality boundary
+### DR-001 — OBSERVATION — The architecture intentionally keeps upstream data authority abstract
 
-**Evidence:** Architecture sections 3, 10, and 15 explicitly state that the bundled catalogue is shipped to the browser, must contain only non-sensitive mock data, and is not suitable for real-world confidential order data. This matches Q-002, Q-006, NFR-002, NFR-003, and the scope boundary, which define a backendless local mock MVP and exclude server-side controls.
+**Evidence:** The architecture describes a summary-rendering boundary for an already identified order and does not invent a required backend contract, lookup flow, or authentication behavior. This is consistent with the approved story’s scope boundary.
 
-**Assessment:** This is an accepted MVP constraint, not a requirements defect. The architecture correctly prevents raw catalogue records from reaching presentation components and maps successful matches to the minimal `TrackingResult`. Implementation must preserve the synthetic-data constraint; real customer data or a production confidentiality claim would require new requirements and architecture review.
-
-### DR-002 — OBSERVATION — Performance assertion needs an implementation-defined measurement method
-
-**Evidence:** Architecture sections 11 and 13 commit to an under-one-second normal lookup and browser performance coverage, while also noting that test tolerance must account for environment noise.
-
-**Assessment:** The target is traceable to NFR-001 and AC-007 and is testable in principle. During implementation, the performance test should define the measured interval and a deterministic normal-lookup fixture so the assertion detects accidental asynchronous/network work without becoming dependent on broad browser startup time.
-
-### DR-003 — OBSERVATION — Hosting mechanism remains intentionally unspecified
-
-**Evidence:** Architecture section 14 says to serve a static bundle from the approved hosting mechanism but does not name one.
-
-**Assessment:** ORD-3 does not specify a hosting platform, runtime service, or deployment target, so this is not a material architecture gap for the story. The eventual deployment decision must preserve the static, backendless, synthetic-catalogue constraints and must not introduce an unreviewed external order authority.
+**Assessment:** This is acceptable because the approved requirements explicitly limit the story to summary display after successful identification. The architecture remains aligned to the approved requirements without assuming a specific source of truth beyond the fact that the order has already been identified.
 
 ## Review Coverage
 
 ### Requirements coverage and consistency
 
-- FR-001 and FR-002: The guest lookup view, native form, required-field validation, and field-associated messages are defined in sections 5, 8, and 9.
-- FR-003 and FR-004: Centralized normalization and same-record matching against the authoritative bundled catalogue are defined in sections 6, 7, and 16.
-- FR-005 and FR-006: The separate minimal `TrackingResult` and presentation boundary expose only order number, status, and timestamp; prohibited personal and payment fields are excluded.
-- FR-007: The service returns one generic failure outcome, omits diagnostics, and clears a prior successful result on failed attempts.
-- FR-008: Native semantics, visible labels, keyboard order, `aria-describedby`, `aria-invalid`, status regions, focus behavior, and responsive constraints are specified.
-- NFR-001 through NFR-004: Local synchronous lookup, no authentication or external integration, explicitly excluded backend controls, and no external outage path are addressed in sections 2, 11, and 14.
-- AC-001 through AC-007: Section 13 maps domain, component, browser, privacy, keyboard, normalization, and performance coverage to the acceptance criteria.
+- FR-001 through FR-010: The architecture defines a single summary view that presents the required order identity, date, status, item summary, quantity, fulfillment state, shipment details, and estimated delivery details while keeping the primary status visible without additional navigation.
+- FR-011: The design keeps the summary contract minimal and excludes unnecessary sensitive customer data and raw internal codes.
+- FR-012: The architecture explicitly degrades gracefully when optional fields are missing and does not make the page fail solely because a detail is absent.
+- FR-013: The model and presentation layer convert internal values into customer-readable labels and values.
+- NFR-001 through NFR-003: The design prioritizes primary status, keeps the layout simple, and separates order status from shipment and delivery details without introducing new product behavior.
+- AC-001 through AC-007: The testing strategy and component boundaries cover the required identity, status visibility, item identification, missing-data resilience, readability, and section separation checks.
 
-No architecture decision invents an unresolved product requirement. Required identifiers, guest access, matching rules, response fields, failure behavior, data authority, and out-of-scope controls all match the confirmed clarification decisions in the approved requirements.
+No architecture decision invents an unresolved product requirement. The draft remains within the approved scope and does not add lookup, identity, or backend requirements that were not explicitly approved.
 
 ### Architecture quality review
 
-- **Boundaries and data flow:** Catalogue, lookup service, validation, view, and shell responsibilities are separated and the request/response flow is explicit.
-- **Privacy and security:** The design avoids match diagnostics, sensitive output, URLs, storage, logs, and telemetry. The frontend exposure risk is explicitly limited to synthetic fixtures.
-- **Accessibility:** The design uses standard form semantics, visible labels, associated errors, invalid state, keyboard order, focus guidance, status announcements, and non-color-only feedback.
-- **Performance and reliability:** The synchronous in-memory path has no network dependency or outage mode, and the linear scan is proportionate to the MVP catalogue.
-- **Testability:** Pure normalization/matching logic, component behavior, browser acceptance flows, privacy assertions, and performance coverage are identified.
-- **Maintainability and complexity:** The selected design is small, typed, deterministic, and avoids persistence, external integrations, and unnecessary abstractions. The internal/public model split is an appropriate boundary for the privacy contract.
-- **Scope discipline:** Authentication, persistence, external order management, and backend security controls are not introduced. Future expansion is correctly conditioned on requirements and architecture review.
-- **Deployment:** Static deployment and synthetic data constraints are stated; the unspecified hosting platform is non-material to this story.
+- **Boundaries and data flow:** The architecture separates the summary container, adapter, and presentation sections while keeping the scope limited to rendering the approved subset of order data.
+- **Privacy and security:** The design purposefully excludes unnecessary customer data and avoids exposing raw internal codes or personal information.
+- **Accessibility:** The plan includes semantic structure, prominent status placement, and responsive, screen-reader-friendly rendering.
+- **Reliability and resilience:** The design handles missing optional data gracefully and avoids hard failures from partial data.
+- **Testability:** The architecture defines model, component, and acceptance-test coverage directly against the approved acceptance criteria.
+- **Scope discipline:** The design does not add lookup, authentication, persistence, or backend controls beyond the approved story.
 
 ## Traceability Summary
 
 | Review area | Evidence in architecture | Requirement authority |
 |---|---|---|
-| Guest lookup and required fields | Sections 2, 5, 8, 9, 16 | FR-001, FR-002, Q-001, Q-003, Q-007 |
-| Normalization and same-record match | Sections 6, 7, 8, 16 | FR-003, FR-004, Q-002, Q-004 |
-| Minimal success response | Sections 6, 8, 10, 16 | FR-005, FR-006, Q-005 |
-| Generic failed response and privacy | Sections 8, 9, 10, 15, 16 | FR-007, Q-006, AC-003, AC-004, AC-005 |
-| Accessibility and responsive behavior | Section 12 and testing strategy | FR-008, AC-001, AC-006 |
-| Performance and operational scope | Sections 2, 11, 13, 14 | NFR-001 through NFR-004, AC-007 |
+| Order summary content | Sections 2, 5, 6, 7, 15 | FR-001 through FR-008 |
+| Status clarity and prioritization | Sections 2, 5, 7, 11, 15 | FR-004, FR-009, FR-010, NFR-001, NFR-003 |
+| Missing optional values | Sections 2, 6, 8, 12, 15 | FR-012, NFR-002, AC-004 |
+| Sensitive and internal data handling | Sections 2, 6, 9, 15 | FR-011, FR-013 |
+| Accessibility and responsiveness | Sections 7, 11, 12 | FR-010, AC-005, AC-006, AC-007 |
 
 ## Gate Boundary
 

@@ -10,8 +10,9 @@ tools: ["read", "search", "edit"]
 
 Follow `.github/copilot-instructions.md`.
 
-Read `<application-root>/docs/sdlc/requirements.md`.
-Own only `<application-root>/docs/sdlc/architecture.md`.
+Require `SDLC Artifact Directory` from the orchestrator.
+Read `<SDLC Artifact Directory>/requirements.md`.
+Own only `<SDLC Artifact Directory>/architecture.md`.
 
 ## Entry Gate
 
@@ -53,7 +54,7 @@ Do not edit design-review.md.
 
 ## Canonical Path Safety
 
-Write directly to `<application-root>/docs/sdlc/architecture.md`.
+Write directly to `<SDLC Artifact Directory>/architecture.md`.
 Never use parent-directory traversal for authoritative artifacts.
 
 

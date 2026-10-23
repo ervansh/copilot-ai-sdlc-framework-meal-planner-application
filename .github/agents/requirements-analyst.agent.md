@@ -15,12 +15,13 @@ Follow `.github/copilot-instructions.md`.
 Require:
 - `Application`
 - `Application Root`
+- `SDLC Artifact Directory`
 - `Source Type`
 - `Source Reference`
 
 Own only:
 
-`<application-root>/docs/sdlc/requirements.md`
+`<SDLC Artifact Directory>/requirements.md`
 
 ## Source Access Boundary
 
@@ -103,13 +104,13 @@ Do not ask for approval.
 
 ## Approval
 
-After explicit human approval is delegated to you, update only `<application-root>/docs/sdlc/requirements.md` to record APPROVED.
+After explicit human approval is delegated to you, update only `<SDLC Artifact Directory>/requirements.md` to record APPROVED.
 
 Do not begin Architecture.
 
 ## Canonical Path Safety
 
-Write the artifact directly to `<application-root>/docs/sdlc/requirements.md`.
+Write the artifact directly to `<SDLC Artifact Directory>/requirements.md`.
 
 Do not use `../` or relative parent traversal when writing authoritative artifacts.
 
@@ -123,7 +124,7 @@ Application: <application>
 Application Root: <application-root>
 Delegated Specialist: requirements-analyst
 Requirements Status: <CLARIFICATION REQUIRED | PENDING HUMAN APPROVAL | APPROVED>
-Target Artifact: <application-root>/docs/sdlc/requirements.md
+Target Artifact: <SDLC Artifact Directory>/requirements.md
 ```
 
 ## Approval State Consistency

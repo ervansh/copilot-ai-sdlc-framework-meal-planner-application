@@ -7,11 +7,11 @@ description: Methodology for designing the active application's architecture fro
 
 Read:
 
-`<application-root>/docs/sdlc/requirements.md`
+`<SDLC Artifact Directory>/requirements.md`
 
 Write:
 
-`<application-root>/docs/sdlc/architecture.md`
+`<SDLC Artifact Directory>/architecture.md`
 
 Requirements must be APPROVED.
 

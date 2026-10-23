@@ -13,7 +13,7 @@ Execute appropriate tests/checks and record real evidence.
 
 Write only:
 
-`<application-root>/docs/sdlc/verification.md`
+`<SDLC Artifact Directory>/verification.md`
 
 Final outcome:
 

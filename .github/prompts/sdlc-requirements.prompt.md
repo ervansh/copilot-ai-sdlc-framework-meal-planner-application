@@ -7,13 +7,15 @@ Provide explicit values in the chat:
 ```text
 Application: <name>
 Application Root: <application-root>
+Story ID: <stable-story-id, when managed>
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 Source Type: <JIRA | CONFLUENCE | WORD>
 Source Reference: <reference>
 ```
 
 Target:
 
-`<application-root>/docs/sdlc/requirements.md`
+`<SDLC Artifact Directory>/requirements.md`
 
 Workflow:
 

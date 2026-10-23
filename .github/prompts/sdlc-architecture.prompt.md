@@ -7,11 +7,13 @@ Provide:
 ```text
 Application: <name>
 Application Root: <application-root>
+Story ID: <stable-story-id, when managed>
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 ```
 
 Read:
 
-`<application-root>/docs/sdlc/requirements.md`
+`<SDLC Artifact Directory>/requirements.md`
 
 Entry gate:
 
@@ -19,7 +21,7 @@ Entry gate:
 
 Write:
 
-`<application-root>/docs/sdlc/architecture.md`
+`<SDLC Artifact Directory>/architecture.md`
 
 Do not re-derive product requirements from Jira/Confluence/Word during normal Architecture.
 

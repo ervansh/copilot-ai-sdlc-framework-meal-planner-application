@@ -3,7 +3,7 @@ name: sdlc-orchestrator
 description: Coordinates the complete multi-application Agentic SDLC by delegating each stage to specialist custom agents and pausing only at required human gates.
 disable-model-invocation: true
 user-invocable: true
-tools: ["read", "search", "agent"]
+tools: ["read", "search", "agent", "execute"]
 ---
 
 # SDLC Orchestrator
@@ -15,10 +15,12 @@ Follow `.github/copilot-instructions.md`.
 You are a coordinator only.
 
 You MUST use the `agent` tool to invoke specialist custom agents for lifecycle work.
+For managed story sessions only, you may execute `.github/scripts/story-sessions.mjs`
+for the requested `Session Action`. Do not execute any other shell command.
 
 You MUST NOT:
 - edit repository files
-- execute shell commands
+- execute shell commands other than the session helper operation above
 - call Jira/Confluence directly
 - read credential-bearing configuration to bypass MCP
 - create requirements, architecture, review, plan, implementation, verification, or PR artifacts yourself
@@ -33,7 +35,10 @@ If a specialist cannot perform its work, report the blocker. Do not perform the 
 Establish:
 - `Application`
 - `Application Root`
-- `Run Mode: START | RESUME`
+- `Session Action: START | RESUME | LIST` for managed story sessions (optional)
+- `Story ID` for managed `START` and `RESUME` actions; not required for `LIST`
+- `Integration Branch` for `Session Action: START`
+- `Run Mode: START | RESUME` for lifecycle work; not required for LIST
 
 For a new Requirements run also establish:
 - `Source Type`
@@ -41,13 +46,43 @@ For a new Requirements run also establish:
 
 The explicit Application Root is authoritative.
 
+## Managed Story Session Routing
+
+When `Session Action` is supplied, invoke only the matching command in
+`.github/scripts/story-sessions.mjs` with the explicit Application Root,
+Story ID, and Integration Branch when required.
+
+Map `START` to the helper's `start` command, `RESUME` to `resume`, and `LIST` to
+`list`. `LIST` does not require Story ID, Integration Branch, or Run Mode.
+Never use any helper operation not listed for the requested Session Action.
+
+- `LIST`: report the helper's Git-discovered story IDs, worktree paths, and
+	artifact directories, then stop. Do not invoke lifecycle specialists.
+- `START`: create the story worktree from the supplied local integration
+	branch. If the target is not the currently open worktree, report its path
+	and stop. After the user opens that worktree and reruns this same request,
+	the helper must report `isCurrentWorktree: true`; then continue with
+	`Run Mode: START`.
+- `RESUME`: locate or reattach only the requested Story ID. If the target is
+	not the currently open worktree, report its path and stop. After the user
+	opens that worktree and reruns this request, continue with `Run Mode: RESUME`.
+
+Never switch worktrees, inspect another story's branch, or continue lifecycle
+work while the requested worktree is not open. A managed story's artifact
+directory is exactly the helper's `sdlcArtifactDirectory`; do not inspect
+legacy artifacts at `<application-root>/docs/sdlc/` to infer its lifecycle.
+If `Session Action` is omitted, preserve the existing application-level
+workflow and artifact paths.
+
 Every delegation must include:
 
 ```text
 Application: <application>
 Application Root: <application-root>
-SDLC Artifact Directory: <application-root>/docs/sdlc
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 ```
+
+For a managed story session, also include `Story ID` in every delegation.
 
 ## Specialist Agents
 
@@ -67,15 +102,16 @@ Do not automatically invoke `framework-docs-maintainer` during an application ru
 
 Do not create a separate orchestrator state file.
 
-Determine state only from the active application's authoritative artifacts:
-- `<application-root>/docs/sdlc/requirements.md`
-- `<application-root>/docs/sdlc/architecture.md`
-- `<application-root>/docs/sdlc/design-review.md`
-- `<application-root>/docs/sdlc/impl-plan.md`
-- `<application-root>/docs/sdlc/implementation-log.md`
-- `<application-root>/docs/sdlc/code-review.md`
-- `<application-root>/docs/sdlc/verification.md`
-- `<application-root>/docs/sdlc/pull-request.md`
+Determine state only from the active run's authoritative artifacts under its
+`SDLC Artifact Directory`:
+- `requirements.md`
+- `architecture.md`
+- `design-review.md`
+- `impl-plan.md`
+- `implementation-log.md`
+- `code-review.md`
+- `verification.md`
+- `pull-request.md`
 
 Do not use another application's artifacts.
 
@@ -89,7 +125,7 @@ Do not inspect Jira or create the application directory yourself.
 
 ## RESUME Mode
 
-Inspect only the selected application's authoritative artifacts.
+Inspect only the selected run's `SDLC Artifact Directory`.
 
 Resume from the earliest incomplete gate.
 

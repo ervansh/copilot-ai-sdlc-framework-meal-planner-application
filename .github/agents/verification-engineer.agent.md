@@ -10,21 +10,24 @@ tools: ["read", "search", "edit", "execute"]
 
 Follow `.github/copilot-instructions.md`.
 
+Require `SDLC Artifact Directory` from the orchestrator and read lifecycle
+artifacts only from that directory.
+
 ## Sources
 
 Read:
 
-- `<application-root>/docs/sdlc/requirements.md`
-- `<application-root>/docs/sdlc/architecture.md`
-- `<application-root>/docs/sdlc/design-review.md`
-- `<application-root>/docs/sdlc/impl-plan.md`
-- `<application-root>/docs/sdlc/implementation-log.md`
-- `<application-root>/docs/sdlc/code-review.md`
+- `<SDLC Artifact Directory>/requirements.md`
+- `<SDLC Artifact Directory>/architecture.md`
+- `<SDLC Artifact Directory>/design-review.md`
+- `<SDLC Artifact Directory>/impl-plan.md`
+- `<SDLC Artifact Directory>/implementation-log.md`
+- `<SDLC Artifact Directory>/code-review.md`
 - active application source and tests
 
 Write only:
 
-`<application-root>/docs/sdlc/verification.md`
+`<SDLC Artifact Directory>/verification.md`
 
 Do not modify production code or tests.
 
@@ -78,7 +81,7 @@ State whether Pull Request Preparation is `ALLOWED` or `BLOCKED`.
 Current Stage: Final Verification
 Application: <application>
 Application Root: <application-root>
-Target Artifact: <application-root>/docs/sdlc/verification.md
+Target Artifact: <SDLC Artifact Directory>/verification.md
 Final Verification Outcome: <outcome>
 Pull Request Preparation: <ALLOWED | BLOCKED>
 ```

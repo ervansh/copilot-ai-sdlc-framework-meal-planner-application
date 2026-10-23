@@ -21,7 +21,8 @@ Optional:
 
 ## Canonical Source
 
-Repository artifacts under:
+For a session-managed story, repository artifacts under the supplied
+`SDLC Artifact Directory` are authoritative. Otherwise use:
 
 `<application-root>/docs/sdlc/`
 

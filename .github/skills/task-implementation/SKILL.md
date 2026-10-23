@@ -9,6 +9,7 @@ Require:
 
 - Application
 - Application Root
+- SDLC Artifact Directory
 - explicit `Task ID: IMP-###`
 
 Use active-application requirements, architecture, review, and approved plan.
@@ -19,7 +20,7 @@ Run relevant tests/checks.
 
 Record actual evidence in:
 
-`<application-root>/docs/sdlc/implementation-log.md`
+`<SDLC Artifact Directory>/implementation-log.md`
 
 Report:
 

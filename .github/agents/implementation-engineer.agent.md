@@ -12,8 +12,9 @@ Follow `.github/copilot-instructions.md`.
 
 Require Application, Application Root, and Task ID `IMP-###`.
 
-Read active-application requirements.md, architecture.md, design-review.md, and impl-plan.md.
-Own implementation changes within the active application and `<application-root>/docs/sdlc/implementation-log.md`.
+Require `SDLC Artifact Directory` from the orchestrator.
+Read requirements.md, architecture.md, design-review.md, and impl-plan.md under that directory.
+Own implementation changes within the active application and `<SDLC Artifact Directory>/implementation-log.md`.
 
 ## Entry Gate
 
@@ -54,14 +55,14 @@ After implementation: `Task Status: IMPLEMENTED — PENDING HUMAN ACCEPTANCE`
 Do not mark DONE.
 
 After explicit human acceptance is delegated back:
-1. record acceptance in implementation-log.md
-2. mark task DONE in impl-plan.md
+1. record acceptance in `<SDLC Artifact Directory>/implementation-log.md`
+2. mark task DONE in `<SDLC Artifact Directory>/impl-plan.md`
 3. promote newly dependency-eligible BLOCKED tasks to READY
 4. do not implement the next task in the same delegation
 
 ## Canonical Path Safety
 
-Write authoritative artifacts directly under `<application-root>/docs/sdlc/`.
+Write authoritative artifacts directly under `SDLC Artifact Directory`.
 Do not use `../` path traversal.
 
 ## Application Toolchain Isolation

@@ -7,12 +7,14 @@ Provide:
 ```text
 Application: <name>
 Application Root: <application-root>
+Story ID: <stable-story-id, when managed>
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 ```
 
 Verify every approved FR/NFR/AC with actual evidence.
 
 Write:
 
-`<application-root>/docs/sdlc/verification.md`
+`<SDLC Artifact Directory>/verification.md`
 
 Do not modify production code or tests.

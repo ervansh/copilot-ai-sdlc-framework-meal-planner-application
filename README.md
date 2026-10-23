@@ -55,7 +55,7 @@ The Meal Planner application has completed the full implemented SDLC workflow.
 | Code Review                  | PASS                             |
 | Final Verification           | PASS WITH OBSERVATIONS           |
 | Pull Request Preparation     | COMPLETE                         |
-| Remote Pull Request Creation | SKIPPED / ENVIRONMENT LIMITATION |
+| Remote Pull Request Creation | NOT EXECUTED IN THE CAPSTONE RUN |
 
 Final verification confirmed:
 
@@ -175,7 +175,7 @@ and continue from its earliest incomplete gate.
 | Code review | `.github/prompts/sdlc-code-review.prompt.md` | Application, Application Root |
 | Final verification | `.github/prompts/sdlc-final-verification.prompt.md` | Application, Application Root |
 | Pull Request preparation | `.github/prompts/sdlc-pr-preparation.prompt.md` | Application, Application Root; verification must allow PR preparation |
-| Orchestrate lifecycle | `.github/prompts/sdlc-orchestrate.prompt.md` | Application, Application Root, Run Mode; for external-source requirements also Source Type and Source Reference; choose whether to publish story documentation to Confluence |
+| Orchestrate lifecycle and story sessions | `.github/prompts/sdlc-orchestrate.prompt.md` | Application, Application Root; optional Session Action and Story ID; Integration Branch for session START; Run Mode for lifecycle work |
 | Publish story documentation | `.github/prompts/publish-story-documentation.prompt.md` | Application, Application Root, Story ID / Source Reference, Confluence Space; this prompt explicitly authorizes the bounded publication task |
 
 For a direct requirements run, start with:
@@ -193,6 +193,26 @@ For orchestration, add:
 Run Mode: <START | RESUME>
 Publish User Story to Confluence: <YES | NO>
 ```
+
+For story worktree management, also provide `Session Action: START | RESUME |
+LIST`, `Story ID`, and an explicit local `Integration Branch` for START. Session
+Action selects a worktree; Run Mode selects the SDLC lifecycle state.
+
+## Switching Between Story Work
+
+Run `.github/prompts/sdlc-orchestrate.prompt.md` with `Session Action: START`,
+the Story ID, and integration branch. If the new worktree is not open, the
+orchestrator reports its path and stops. Open it in VS Code and rerun with the
+same Session Action and `Run Mode: START`; the orchestrator then begins the
+story lifecycle.
+
+To return later, run the same prompt with `Session Action: RESUME` and the
+Story ID. Open the reported path and rerun with `Run Mode: RESUME`. `LIST`
+discovers linked story worktrees. Managed story artifacts live in
+`<application-root>/docs/sdlc/stories/<story-id>/`; non-managed workflows keep
+the existing `<application-root>/docs/sdlc/` paths. Worktrees remain until
+explicitly cleaned up. The workflow restores repository context, not Copilot
+chat transcripts.
 
 Human approval and task-acceptance gates remain explicit. A prompt invocation
 does not approve requirements, architecture, an implementation plan, or an
@@ -257,7 +277,7 @@ The framework distinguishes between:
 
 * the authoritative source story (Jira, Confluence, or Word)
 * the Confluence documentation artifact created from it
-* the approved downstream contract in `<application-root>/docs/sdlc/requirements.md`
+* the approved downstream contract in `<SDLC Artifact Directory>/requirements.md`; managed stories use `docs/sdlc/stories/<story-id>/`
 
 ---
 
@@ -386,7 +406,7 @@ requirements artifact.
 Output:
 
 ```text
-<application-root>/docs/sdlc/requirements.md
+<SDLC Artifact Directory>/requirements.md
 ```
 
 Key responsibilities:
@@ -1161,6 +1181,21 @@ Contains:
 * intended PR title
 
 Remote creation remained environment-dependent.
+
+The reusable PR workflow supports remote creation through GitHub MCP after
+explicit per-run approval. The GitHub server entry is documented in
+`framework-docs/agentic-sdlc-framework.md`; merge it into your local
+`.vscode/mcp.json`, which is ignored by Git and may already contain other
+servers. The endpoint is limited to repository and pull-request toolsets and uses
+VS Code's remote-server sign-in flow. Runtime OAuth and PR creation have not
+been verified in this repository. Git still performs local commit and push
+operations, which require separate Git authentication.
+
+Before any PR-related commit, push, or creation, the preparer must show the
+exact changes, target branches, title, and body and receive explicit approval.
+It verifies the created PR through GitHub MCP and never merges. If Git, remote,
+authentication, or MCP access is unavailable, it records a prepared-but-blocked
+outcome instead of claiming a PR exists.
 
 ---
 

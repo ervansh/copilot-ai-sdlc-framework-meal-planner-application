@@ -7,12 +7,14 @@ Provide:
 ```text
 Application: <name>
 Application Root: <application-root>
+Story ID: <stable-story-id, when managed>
+SDLC Artifact Directory: <resolved-sdlc-artifact-directory>
 ```
 
 Review only the selected application's approved artifacts, implementation, and tests.
 
 Write:
 
-`<application-root>/docs/sdlc/code-review.md`
+`<SDLC Artifact Directory>/code-review.md`
 
 Do not modify production code or tests.

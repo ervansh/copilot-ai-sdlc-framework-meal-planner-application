@@ -10,6 +10,9 @@ tools: ["read", "search", "edit", "execute"]
 
 Follow `.github/copilot-instructions.md`.
 
+Require `SDLC Artifact Directory` from the orchestrator and read lifecycle
+artifacts only from that directory.
+
 ## Sources
 
 Read the active application's:
@@ -24,7 +27,7 @@ Read the active application's:
 
 Write only:
 
-`<application-root>/docs/sdlc/code-review.md`
+`<SDLC Artifact Directory>/code-review.md`
 
 Do not modify production code or tests.
 
@@ -74,7 +77,7 @@ State whether Final Verification is `ALLOWED` or `BLOCKED`.
 Current Stage: Code Review
 Application: <application>
 Application Root: <application-root>
-Target Artifact: <application-root>/docs/sdlc/code-review.md
+Target Artifact: <SDLC Artifact Directory>/code-review.md
 Code Review Outcome: <outcome>
 Final Verification: <ALLOWED | BLOCKED>
 ```

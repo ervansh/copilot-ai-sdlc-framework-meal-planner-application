@@ -1,110 +1,83 @@
 # Order Tracking Requirements
 
-Application: Order Tracking  
-Application Root: order-tracking  
-Run Mode: START  
-Source Type: JIRA  
-Source Reference: ORD-3  
+Application: Order Tracking
+Application Root: order-tracking
+Run Mode: START
+Source Type: JIRA
+Source Reference: ORD-4
 Requirements Status: APPROVED
 
 ## Approval Evidence
 
-- Human decision: "I explicitly approve the requirement."
-- Approval date: 2026-09-23
+- Human approval for the Requirements stage was explicitly provided on 2026-10-23.
+- This approved requirement set is the source of truth for the story and is ready to enter Architecture.
 
 ## Provenance
 
-- Source: Jira issue [ORD-3](https://ervanshsingh.atlassian.net/browse/ORD-3)
+- Source: Jira issue [ORD-4](https://ervanshsingh.atlassian.net/browse/ORD-4)
 - Issue type: Story
-- Summary: Allow a customer to locate and track an existing order.
+- Summary: View Order Summary - Display the main details of a successfully identified order.
 - Project: Order Tracking (`ORD`)
-- Retrieved through the authorized Jira/MCP issue retrieval capability on 2026-09-23.
+- Dependency: ORD-101 — Track an Order.
+- Retrieved through the authorized Jira/MCP issue retrieval capability on 2026-10-23.
 - Confluence publication: Not requested (`NO`).
 
 ## Explicit Source Facts
 
-1. A customer needs an entry point to identify an existing order.
-2. Valid tracking information takes the customer to the Order Tracking view for that order.
-3. The application must not expose order information when supplied tracking information cannot be validated.
-4. The identifying information must balance ease of use with protection of customer order data.
-5. A successful lookup displays tracking information for the existing order.
-6. A lookup with no matching order displays no order details and shows a clear not-found-or-not-validated message.
-7. A lookup with missing required information is prevented and the missing information is identified.
-8. Harmless formatting differences in valid identifying information should be handled without requiring re-entry.
-9. An unsuccessful attempt must not reveal private information about another customer's order.
-10. Account registration and password recovery are out of scope.
-11. Whether authentication is required for other Order Tracking capabilities is explicitly undecided by this story.
-12. Jira lists no dependencies for this story and identifies it as the primary entry story for the Order Tracking experience.
+1. After an order has been successfully located, the tracking page should display the key information needed to identify the order and understand its current state.
+2. The page should clearly distinguish the order-level status from shipment or delivery information.
+3. The customer should not need to navigate through multiple pages to understand the primary status of the order.
+4. The order summary should include information such as: order identifier, order date, current order status, items or item summary, quantity information, overall fulfillment state, available shipment information, and available estimated delivery information.
+5. Sensitive customer information should not be unnecessarily exposed.
+6. Given a successfully identified order, the order identifier shown corresponds to the requested order.
+7. Given an order with a known current status, the order summary clearly displays that status.
+8. Given an order containing one or more items, the customer can identify which items belong to the order.
+9. Given optional order information is unavailable, the tracking page continues to display the available information and does not fail solely because an optional value is missing.
+10. The most important information, including current status, should be understandable without requiring the customer to interpret internal system codes.
+11. Jira identifies ORD-101 — Track an Order as a dependency for this story.
 
 ## Clarification Decision Log
 
-### Q-001 — Required lookup information
-
-Decision: Use Order Number and Email Address. Both fields are required.
-
-### Q-002 — Order data authority and lookup scope
-
-Decision: Use a local bundled mock order catalogue for the MVP. The catalogue is authoritative. No external order-management integration is required for this story.
-
-### Q-003 — Authentication for this lookup entry point
-
-Decision: No authentication is required. This is a guest order lookup flow.
-
-### Q-004 — Matching and normalization rules
-
-Decision: Trim leading and trailing whitespace from the order number and compare it case-insensitively. Trim whitespace from the email address and lowercase it before comparison. Both normalized fields must match the same order.
-
-### Q-005 — Minimum successful response
-
-Decision: Display the order number, current order status, and last updated timestamp. Do not display the full customer name, full email address, phone number, postal address, or payment information.
-
-### Q-006 — Failed-attempt privacy behavior
-
-Decision: A failed lookup always returns the same generic message, regardless of whether the order number or email address exists. CAPTCHA, account lockout, alerting, audit logging, and server-side rate limiting are out of scope for this MVP because there is no backend.
-
-### Q-007 — Validation and error presentation
-
-Decision: Show required-field errors before lookup. Fields have visible labels. Validation messages must be understandable and associated with the relevant field. The flow supports keyboard use and standard accessible form semantics.
-
-### Q-008 — Operational requirements
-
-Decision: The local lookup target is under 1 second for a normal lookup. External source outage behavior is not applicable because data is bundled locally.
+No blocking clarification questions are required for this source. The Jira story contains sufficient explicit product requirements and acceptance criteria to proceed to human approval without material ambiguity.
 
 ## Functional Requirements
 
-- FR-001: Provide a guest lookup entry point with required Order Number and Email Address fields. (SOURCE: 1, 2, 7; Q-001, Q-003)
-- FR-002: Prevent lookup until both required fields are supplied and show understandable, field-associated required-field errors. (SOURCE: 7; Q-001, Q-007)
-- FR-003: Normalize the order number by trimming leading and trailing whitespace and comparing case-insensitively. Normalize the email address by trimming whitespace and lowercasing before comparison. (SOURCE: 8; Q-004)
-- FR-004: Match the normalized order number and email address against the same record in the local bundled mock order catalogue, which is authoritative for this MVP. (SOURCE: 2, 3; Q-002, Q-004)
-- FR-005: On a successful match, display the order number, current order status, and last updated timestamp. (SOURCE: 5; Q-005)
-- FR-006: Do not display the full customer name, full email address, phone number, postal address, or payment information. (SOURCE: 3, 9; Q-005)
-- FR-007: On any failed lookup, display the same generic failure message and no order details, regardless of whether either supplied identifier exists. (SOURCE: 3, 6, 9; Q-006)
-- FR-008: Support keyboard use, visible field labels, and standard accessible form semantics, including association between validation messages and their relevant fields. (Q-007)
+- FR-001: After a successful order lookup, display an order summary for the identified order. (SOURCE: 1, 6)
+- FR-002: Show the order identifier in the summary so it matches the requested order. (SOURCE: 4, 6)
+- FR-003: Show the order date in the summary for the identified order. (SOURCE: 4)
+- FR-004: Show the current order status in a way that is clearly understandable to the customer. (SOURCE: 1, 2, 7, 10)
+- FR-005: Show item information or an item summary and quantity information for the order. (SOURCE: 4, 8)
+- FR-006: Show the overall fulfillment state of the order. (SOURCE: 4)
+- FR-007: Show available shipment information when it is available. (SOURCE: 2, 4)
+- FR-008: Show available estimated delivery information when it is available. (SOURCE: 2, 4)
+- FR-009: Distinguish order-level status from shipment or delivery details in the presentation. (SOURCE: 2)
+- FR-010: Keep the primary status visible without requiring additional navigation. (SOURCE: 3)
+- FR-011: Avoid exposing unnecessary sensitive customer information. (SOURCE: 5)
+- FR-012: When optional values are absent, continue displaying the available order information without failing solely because an optional field is missing. (SOURCE: 9)
+- FR-013: Use customer-readable labels and values instead of requiring interpretation of internal codes. (SOURCE: 10)
 
 ## Non-Functional Requirements
 
-- NFR-001: A normal local lookup completes in under 1 second. (Q-008)
-- NFR-002: No authentication or external order-management integration is required for this story. (Q-002, Q-003)
-- NFR-003: CAPTCHA, account lockout, alerting, audit logging, and server-side rate limiting are out of scope for this backendless MVP. (Q-006)
-- NFR-004: External source outage behavior is not applicable because the authoritative catalogue is bundled locally. (Q-008)
+- NFR-001: The summary should prioritize the most important information, particularly the current order status, so it is immediately understandable. (SOURCE: 1, 3, 10)
+- NFR-002: The page must handle missing optional order data gracefully and remain usable. (SOURCE: 9)
+- NFR-003: The design must separate order-level status from shipment and delivery information to reduce confusion. (SOURCE: 2)
 
 ## Acceptance Criteria
 
-- AC-001: Given the lookup form, when either Order Number or Email Address is missing, then lookup is prevented and an understandable error is shown and associated with the missing field.
-- AC-002: Given valid identifiers with leading or trailing whitespace and case differences permitted by the normalization rules, when both normalized values match the same catalogue order, then the customer sees that order's order number, current status, and last updated timestamp.
-- AC-003: Given identifiers that do not match the same catalogue order, when the customer submits the form, then the customer sees one generic failure message and no order details.
-- AC-004: Given a failed lookup, when only one identifier exists or either identifier does not exist, then the externally visible failure behavior remains the same.
-- AC-005: Given the successful result, then the customer cannot see the full customer name, full email address, phone number, postal address, or payment information.
-- AC-006: Given keyboard-only use of the flow, then the customer can reach, fill, submit, and receive associated validation feedback for the form using standard accessible semantics.
-- AC-007: Given a normal lookup against the bundled catalogue, then the lookup completes in under 1 second.
+- AC-001: Given a successfully identified order, when the tracking page is displayed, then the order identifier shown corresponds to the requested order.
+- AC-002: Given an order with a known current status, when the summary is displayed, then the order summary clearly displays that status.
+- AC-003: Given an order containing one or more items, when the summary is displayed, then the customer can identify which items belong to the order.
+- AC-004: Given optional order information is unavailable, when the page loads, then the available order information continues to display and the page does not fail solely because an optional value is missing.
+- AC-005: Given the order summary is visible, when the customer reviews it, then the most important information, including current status, is understandable without interpreting internal system codes.
+- AC-006: Given order summary information, when the customer compares order-level status to shipment or delivery data, then the order status is clearly distinguished from shipment or delivery information.
+- AC-007: Given a successfully identified order, when the customer opens the tracking page, then the primary status is visible without requiring additional navigation.
 
 ## Scope Boundary
 
-In scope is the customer-facing guest entry point, required-field validation, normalization, local catalogue matching, privacy-preserving failure behavior, and display of the specified tracking fields for an existing order. Account registration, password recovery, authentication, external order-management integration, and backend security controls listed in NFR-003 are out of scope for this story. Authentication requirements for other Order Tracking capabilities remain outside this story.
+In scope is the customer-facing order summary view after a successful order lookup. It includes summary content for order identity, date, current status, items or item summary, fulfillment status, and any available shipment or estimated delivery details, while preserving clear separation between order state and shipment/delivery state. Out of scope for this story is the order lookup flow, authentication requirements, detailed shipment tracking history, and any additional back-end or customer support workflows beyond the summary presentation for an already identified order.
 
 ## Open Questions
 
-None. All material clarification questions for this story have authoritative
-human decisions recorded above.
+None. No material product decision remains unresolved in the source story.
 
 Requirements Status: APPROVED.

@@ -50,6 +50,7 @@ A typical invocation provides:
 
 - Application
 - Application Root
+- SDLC Artifact Directory, when the story is session-managed
 - Source Type
 - Source Reference / Story ID
 - Confluence Space Key or Space Name
@@ -65,7 +66,8 @@ Confluence Space: ORDER
 
 ## Required Source Artifacts
 
-Discover the finalized artifacts under:
+Discover the finalized artifacts under the supplied `SDLC Artifact Directory`
+for session-managed stories. Otherwise use:
 
 `<application-root>/docs/sdlc/`
 

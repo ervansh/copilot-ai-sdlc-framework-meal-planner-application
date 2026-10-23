@@ -7,12 +7,12 @@ description: Independent architecture-review methodology for the active applicat
 
 Review:
 
-- `<application-root>/docs/sdlc/requirements.md`
-- `<application-root>/docs/sdlc/architecture.md`
+- `<SDLC Artifact Directory>/requirements.md`
+- `<SDLC Artifact Directory>/architecture.md`
 
 Write:
 
-`<application-root>/docs/sdlc/design-review.md`
+`<SDLC Artifact Directory>/design-review.md`
 
 Use findings `DR-###` with BLOCKER/MAJOR/MINOR/OBSERVATION.
 

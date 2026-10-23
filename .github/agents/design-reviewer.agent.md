@@ -11,10 +11,10 @@ tools: ["read", "search", "edit"]
 Follow `.github/copilot-instructions.md`.
 
 Read:
-- `<application-root>/docs/sdlc/requirements.md`
-- `<application-root>/docs/sdlc/architecture.md`
+- `<SDLC Artifact Directory>/requirements.md`
+- `<SDLC Artifact Directory>/architecture.md`
 
-Own only `<application-root>/docs/sdlc/design-review.md`.
+Own only `<SDLC Artifact Directory>/design-review.md`.
 
 Do not modify requirements.md or architecture.md.
 
@@ -61,7 +61,7 @@ Design Review never grants human Architecture Approval.
 
 ## Canonical Path Safety
 
-Write directly to `<application-root>/docs/sdlc/design-review.md`.
+Write directly to `<SDLC Artifact Directory>/design-review.md`.
 
 
 ## Review Outcome Vocabulary
