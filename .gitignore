@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build and tooling output
+dist/
+.vite/
+coverage/
+test-results/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+mcp.json
+
+# Package manager and runtime logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,1066 @@
+# Agentic SDLC Framework
+
+## Purpose
+
+This document describes the reusable Agentic SDLC framework built and exercised
+during the Meal Planner capstone.
+
+The framework uses GitHub Copilot customization capabilities to guide software
+delivery through explicit lifecycle stages, independent review roles, artifact
+traceability, and human approval gates.
+
+The framework is intentionally repository-driven.
+
+It does not depend on a single application domain. Each run establishes an
+explicit Application and Application Root, and all source, tests, and SDLC
+artifacts remain isolated to that application.
+
+The Meal Planner application was used to exercise and validate the framework,
+but the lifecycle is intended to be reusable for other software projects.
+
+---
+
+# Core Principles
+
+## 1. Framework First
+
+The reusable SDLC capability is created before it is used on the application.
+
+For each lifecycle capability:
+
+1. define the Agent
+2. define the Skill
+3. define the Prompt
+4. run the capability against the application
+5. inspect the resulting artifact
+6. perform the required human gate
+7. continue to the next stage
+
+This prevents the application workflow from becoming an ad hoc sequence of
+Copilot prompts.
+
+---
+
+## 2. Explicit Lifecycle Stages
+
+The framework uses these lifecycle stages:
+
+1. Requirements Analysis
+2. Requirements Review and Approval
+3. Architecture
+4. Design Review
+5. Architecture Approval
+6. Implementation Planning
+7. Implementation
+8. Code Review
+9. Final Verification
+10. Pull Request Preparation
+
+Each stage has a defined responsibility and output artifact.
+
+Later stages must not silently perform work owned by an earlier stage.
+
+---
+
+## 3. Source-Driven Requirements
+
+Requirements Analysis begins from an authoritative source artifact, not from a
+chat description alone.
+
+Supported sources include:
+
+- Jira work item
+- Confluence page
+- Microsoft Word `.docx`
+
+Before asking requirements questions, the Requirements Analyst must:
+
+1. identify the source type
+2. retrieve and read the source
+3. record source provenance
+4. summarize only what the source actually states
+5. identify gaps, ambiguities, and conflicts
+6. ask only the missing clarification questions
+
+This keeps requirements grounded in source evidence and prevents Copilot from
+silently inventing product decisions.
+
+The source-driven workflow uses stable clarification IDs such as Q-001,
+Q-002, and so on. Human responses become confirmed decisions only when the
+user explicitly answers them.
+
+When the requirements are finalized, they are written to:
+
+- `<SDLC Artifact Directory>/requirements.md`
+
+For application-level runs without a Story ID, `SDLC Artifact Directory` is
+`<application-root>/docs/sdlc/`. For managed story runs, it is
+`<application-root>/docs/sdlc/stories/<story-id>/`.
+
+and remain in `PENDING APPROVAL` until a human explicitly approves them.
+
+The approved requirements artifact becomes the authoritative downstream SDLC
+contract for architecture and implementation.
+
+## 4. Human-in-the-Loop Gates
+
+Copilot may analyze, design, implement, review, and verify work.
+
+Copilot must not invent human approval.
+
+Important lifecycle decisions remain explicit human gates.
+
+Examples:
+
+- Requirements Approval
+- Architecture Approval
+- Implementation Plan Approval
+- Implementation Task Acceptance
+
+An agent must stop when a required gate has not passed.
+
+---
+
+## 5. Independent Review
+
+The agent that creates an artifact must not automatically approve its own work.
+
+Examples:
+
+- Solution Architect creates architecture.
+- Design Reviewer independently reviews architecture.
+- Implementation Engineer writes code.
+- Code Reviewer independently reviews completed code.
+- Verification Engineer independently verifies the final application.
+
+This separation makes review results more meaningful.
+
+---
+
+## 6. Artifact-Based State
+
+Lifecycle state is stored in repository artifacts rather than inferred from chat
+history.
+
+Examples:
+
+- requirements.md
+- architecture.md
+- design-review.md
+- impl-plan.md
+- implementation-log.md
+- code-review.md
+- verification.md
+- pull-request.md
+
+This allows another Copilot session or human reviewer to understand the current
+state without relying on previous conversations.
+
+## Story Work Sessions
+
+The SDLC Orchestrator accepts `Session Action: START | RESUME | LIST` to manage
+story worktrees. Session Action selects the repository context; `Run Mode:
+START | RESUME` independently controls lifecycle processing. A stable Story ID
+and Application Root identify each worktree. New worktrees are created from an
+explicit local integration branch.
+
+Managed story artifacts use
+`<application-root>/docs/sdlc/stories/<story-id>/`; the existing
+`<application-root>/docs/sdlc/` layout remains for non-managed runs. The
+orchestrator stops with the target path when a workspace switch is required.
+The user opens that worktree and reruns orchestration, which then continues the
+lifecycle using only that story's artifacts. Session discovery comes from Git
+worktrees, not a separate registry. Worktrees are not automatically cleaned up,
+and a Copilot Chat transcript is not restored.
+
+## 7. Confluence Story Documentation Is Distinct From Requirements
+
+The framework also includes a separate Confluence documentation agent for user-story
+publishing and a framework documentation maintainer for repository-level docs sync.
+
+These artifacts are documentation, not the application-level requirements contract.
+
+The relationship is:
+
+- Source User Story: the original Jira, Confluence, or Word source
+- Confluence User Story Documentation Artifact: readable project documentation
+- requirements.md: the approved downstream SDLC contract used for architecture
+  and implementation
+
+These are related but not interchangeable.
+
+---
+
+# Repository Structure
+
+The framework uses the following repository organization:
+
+copilot-capstone/
+├── .github/
+│   ├── agents/
+│   ├── skills/
+│   ├── prompts/
+│   ├── hooks/
+│   └── copilot-instructions.md
+├── framework-docs/
+├── <application-root>/
+│   ├── docs/
+│   │   └── sdlc/
+│   ├── src/
+│   ├── tests/
+│   └── CHANGELOG.md
+└── README.md
+
+`.github/` contains reusable Copilot customization.
+
+`framework-docs/` documents the reusable framework.
+
+`<application-root>/` contains one application and its application-specific
+SDLC artifacts. `meal-planner/` is the capstone example, not a required root.
+
+---
+
+# Copilot Capability Model
+
+The framework uses the following mental model.
+
+## Agent = WHO
+
+An Agent defines:
+
+- role
+- responsibility
+- allowed scope
+- prohibited actions
+- artifact ownership
+- entry gates
+- stopping conditions
+- available tools
+
+Examples:
+
+- Requirements Analyst
+- SDLC Orchestrator
+- Solution Architect
+- Design Reviewer
+- Implementation Planner
+- Implementation Engineer
+- Code Reviewer
+- Verification Engineer
+- Pull Request Preparer
+- User Story Documenter
+- Framework Documentation Maintainer
+
+---
+
+## Skill = HOW
+
+A Skill defines reusable methodology.
+
+Examples:
+
+- requirements-analysis
+- architecture-design
+- design-review
+- implementation-planning
+- task-implementation
+- code-review
+- final-verification
+- pull-request-preparation
+- user-story-documentation
+
+Skills should remain reusable across applications when possible.
+
+They should not duplicate all application-specific instructions from the Agent.
+
+---
+
+## Prompt = WHAT NOW
+
+A Prompt starts a specific workflow.
+
+Examples:
+
+- analyze Meal Planner requirements
+- create Meal Planner architecture
+- review Meal Planner design
+- create implementation plan
+- implement IMP-006
+- perform final verification
+- orchestrate the full SDLC workflow
+- publish finalized story documentation
+
+A Prompt should provide enough application context to begin the task while
+leaving methodology to the Skill and responsibilities to the Agent.
+Framework documentation maintenance is performed by the
+`framework-docs-maintainer` agent; the repository has no dedicated prompt for
+that role.
+
+---
+
+## Instructions = ALWAYS-ON REPOSITORY RULES
+
+`.github/copilot-instructions.md` defines repository-wide rules such as:
+
+- repository structure
+- application paths
+- SDLC lifecycle
+- approval expectations
+- framework-first behavior
+- path invariants
+- human-in-the-loop requirements
+
+Instructions should contain rules relevant to many interactions.
+
+---
+
+## Hooks = DETERMINISTIC AUTOMATION
+
+Hooks can execute commands at Copilot lifecycle events.
+
+They are useful for deterministic guardrails such as:
+
+- blocking dangerous commands
+- enforcing policy
+- logging activity
+- running validation
+
+This repository contains hook configuration and scripts under `.github/hooks/`.
+They provide deterministic policy checks, verification-evidence reminders, and
+minimal error/audit metadata. Their runtime behavior has not been claimed as
+verified through the primary VS Code workflow; verify them on a supported
+Copilot CLI or cloud-agent surface before treating them as operational
+governance.
+
+---
+
+# Lifecycle Artifacts
+
+Non-managed application runs use these artifacts:
+
+<application-root>/docs/sdlc/
+├── requirements.md
+├── architecture.md
+├── design-review.md
+├── impl-plan.md
+├── implementation-log.md
+├── code-review.md
+├── verification.md
+└── pull-request.md
+
+Each artifact has a specific responsibility.
+
+For a managed story run, resolve `SDLC Artifact Directory` to
+`<application-root>/docs/sdlc/stories/<story-id>/` and place the same artifact
+set there. The orchestrator passes that directory to each specialist. Existing
+application-level paths remain unchanged when no Story ID is supplied.
+
+---
+
+# Source-of-Truth Rules
+
+A critical framework rule is:
+
+Lifecycle fields must be evaluated from the artifact that owns them.
+
+Paths below show the non-managed application-level default. For a managed
+story, replace the `<application-root>/docs/sdlc/` prefix with that run's
+`SDLC Artifact Directory`.
+
+Do not use every artifact as an authority for every lifecycle state.
+
+## Requirements Approval
+
+Authoritative artifact:
+
+`<application-root>/docs/sdlc/requirements.md`
+
+Example state:
+
+Requirements Status: APPROVED
+
+---
+
+## Architecture Approval
+
+Authoritative artifact:
+
+`<application-root>/docs/sdlc/architecture.md`
+
+Example states:
+
+Architecture Status: APPROVED
+
+Architecture Approval: APPROVED
+
+A Design Review artifact may correctly show historical metadata such as:
+
+Architecture Approval: PENDING HUMAN APPROVAL
+
+That value describes the state when Design Review occurred.
+
+It must not override a later human approval stored in architecture.md.
+
+---
+
+## Design Review Outcome
+
+Authoritative artifact:
+
+`<application-root>/docs/sdlc/design-review.md`
+
+Example:
+
+Review Outcome: PASS
+
+---
+
+## Implementation Plan Approval
+
+Authoritative artifact:
+
+`<application-root>/docs/sdlc/impl-plan.md`
+
+Example:
+
+Implementation Plan Status: APPROVED
+
+---
+
+## Implementation Completion
+
+Authoritative artifacts:
+
+`<application-root>/docs/sdlc/impl-plan.md`
+
+and:
+
+`<application-root>/docs/sdlc/implementation-log.md`
+
+The implementation plan records task status.
+
+The implementation log records execution and human acceptance evidence.
+
+---
+
+## Code Review Outcome
+
+Authoritative artifact:
+
+`<application-root>/docs/sdlc/code-review.md`
+
+Example:
+
+Review Outcome: PASS
+
+---
+
+## Final Verification Outcome
+
+Authoritative artifact:
+
+`<application-root>/docs/sdlc/verification.md`
+
+Example:
+
+PASS
+
+or:
+
+PASS WITH OBSERVATIONS
+
+---
+
+# Stage 1 — Requirements Analysis
+
+## Role
+
+Requirements Analyst
+
+## Inputs
+
+- authoritative Jira, Confluence, or Word source
+- repository instructions
+
+## Output
+
+requirements.md
+
+## Responsibilities
+
+- retrieve the source through the authorized source tool
+- record provenance and summarize source facts
+- clarify only material gaps and ambiguities
+- distinguish confirmed facts from assumptions
+- define functional requirements
+- define non-functional requirements
+- define acceptance criteria
+- identify scope
+- identify out-of-scope behavior
+- record unresolved questions
+- maintain traceability
+
+## Important Rule
+
+Do not begin architecture while requirements remain unresolved.
+
+---
+
+# Stage 2 — Requirements Approval
+
+Requirements remain pending until a human explicitly approves them.
+
+Example:
+
+Requirements Status: APPROVED
+
+No later stage should infer approval from silence.
+
+---
+
+# Stage 3 — Architecture
+
+## Role
+
+Solution Architect
+
+## Inputs
+
+- approved requirements
+- repository instructions
+
+## Output
+
+architecture.md
+
+## Responsibilities
+
+- identify architecture drivers
+- define components and ownership
+- define data model
+- define major data flows
+- define persistence model
+- define validation boundaries
+- address NFRs
+- define architecture decisions
+- define risks
+- establish traceability
+
+Architecture must remain consistent with approved scope.
+
+---
+
+# Stage 4 — Design Review
+
+## Role
+
+Independent Design Reviewer
+
+## Input
+
+- requirements.md
+- architecture.md
+
+## Output
+
+design-review.md
+
+## Finding Severities
+
+BLOCKER
+
+MAJOR
+
+MINOR
+
+OBSERVATION
+
+## Outcomes
+
+PASS
+
+PASS WITH MINOR CHANGES
+
+REWORK REQUIRED
+
+The reviewer does not approve architecture.
+
+It only determines whether the architecture is ready for human approval.
+
+---
+
+# Stage 5 — Architecture Approval
+
+After Design Review succeeds, a human explicitly approves architecture.
+
+Example:
+
+Architecture Status: APPROVED
+
+Architecture Approval: APPROVED
+
+Design Review remains historical evidence and does not need to be rewritten.
+
+---
+
+# Stage 6 — Implementation Planning
+
+## Role
+
+Implementation Planner
+
+## Input
+
+- approved requirements
+- approved architecture
+- successful design review
+
+## Output
+
+impl-plan.md
+
+## Responsibilities
+
+Convert design into:
+
+- dependency-ordered tasks
+- priorities
+- requirements mappings
+- architecture mappings
+- test expectations
+- completion criteria
+- blockers
+- execution sequence
+
+Tasks use stable IDs:
+
+IMP-001
+IMP-002
+IMP-003
+...
+
+The plan must not write production code.
+
+---
+
+# Stage 7 — Implementation
+
+## Role
+
+Implementation Engineer
+
+Implementation is performed one approved task at a time.
+
+Example workflow:
+
+IMP-005 = READY
+        ↓
+dependency check
+        ↓
+implementation
+        ↓
+tests
+        ↓
+verification
+        ↓
+IMPLEMENTED — PENDING HUMAN ACCEPTANCE
+        ↓
+human acceptance
+        ↓
+IMP-005 = DONE
+
+This model prevents the agent from implementing the entire application without
+review checkpoints.
+
+---
+
+# Task-Level Human Acceptance
+
+An Implementation Engineer must not automatically mark its task DONE.
+
+After implementation:
+
+Task Execution Status:
+
+IMPLEMENTED — PENDING HUMAN ACCEPTANCE
+
+After human acceptance:
+
+Task Status:
+
+DONE
+
+Only then may dependent tasks become eligible.
+
+---
+
+# Implementation Evidence
+
+implementation-log.md records:
+
+- task
+- requirements
+- architecture references
+- files added
+- files modified
+- tests
+- commands
+- verification results
+- deviations
+- known issues
+- human acceptance
+
+This provides an auditable implementation history.
+
+---
+
+# Stage 8 — Code Review
+
+## Role
+
+Independent Code Reviewer
+
+## Inputs
+
+- approved requirements
+- approved architecture
+- implementation plan
+- implementation log
+- application source
+- tests
+
+## Output
+
+code-review.md
+
+## Required Review Areas
+
+- correctness
+- architecture compliance
+- error handling
+- security and privacy
+- test quality
+- maintainability
+- meaningful duplication
+- dependency safety
+- scope compliance
+
+## Outcomes
+
+PASS
+
+PASS WITH MINOR CHANGES
+
+REWORK REQUIRED
+
+The reviewer must inspect actual code and tests rather than relying only on
+implementation summaries.
+
+---
+
+# Stage 9 — Final Verification
+
+## Role
+
+Verification Engineer
+
+## Output
+
+verification.md
+
+Final Verification checks whether the completed application demonstrably
+satisfies the approved software contract.
+
+It verifies individually:
+
+- every functional requirement
+- every non-functional requirement
+- every acceptance criterion
+
+Results use:
+
+PASS
+
+FAIL
+
+NOT VERIFIED
+
+A requirement must not be marked PASS simply because the implementation plan
+claims it was implemented.
+
+---
+
+# Verification Scope
+
+Final Verification includes:
+
+- unit and integration tests
+- browser workflows
+- lint
+- type checking
+- production build
+- runtime startup
+- performance
+- persistence
+- failure behavior
+- accessibility evidence
+- responsive evidence
+- dependency audit
+- documentation consistency
+
+---
+
+# Stage 10 — Pull Request Preparation
+
+## Role
+
+Pull Request Preparer
+
+## Inputs
+
+- completed implementation
+- Code Review PASS
+- Final Verification PASS or PASS WITH OBSERVATIONS
+
+## Outputs
+
+- CHANGELOG.md
+- pull-request.md
+- Git commit and push after explicit per-run human approval
+- verified GitHub Pull Request created through the configured GitHub MCP server
+- prepared-but-blocked status with the reason when Git or MCP prerequisites fail
+
+## Required PR Sections
+
+- Summary
+- Changes Made
+- Test Evidence
+- Known Limitations
+- Reviewer Checklist
+
+The PR Preparer must not merge the pull request.
+
+Before any PR-related commit, push, or remote creation, the preparer presents
+the exact changes, remote, head/base branches, title, and body for explicit
+human approval. Git handles local operations; GitHub MCP handles remote PR
+lookup, creation, and read-back verification. Git push authentication is
+separate from GitHub MCP authentication. The preparer does not switch branches,
+discard unrelated work, use direct REST calls, or claim success without
+verifying the created PR.
+
+## GitHub MCP and Git Prerequisites
+
+The repository ignores `mcp.json` to keep workspace-specific server settings
+and credentials out of version control. Merge this server entry into your local
+`.vscode/mcp.json` `servers` object, preserving any existing servers such as
+Atlassian:
+
+```json
+{
+    "github": {
+        "type": "http",
+        "url": "https://api.githubcopilot.com/mcp/",
+        "headers": {
+            "X-MCP-Toolsets": "repos,pull_requests"
+        }
+    }
+}
+```
+
+When VS Code starts the server, review its trust prompt and complete the GitHub
+sign-in flow. Do not add a personal access token to tracked configuration or
+chat.
+
+Before attempting a PR run, verify that:
+
+- the GitHub MCP server starts and can perform a low-impact repository read
+- the local repository has the intended GitHub remote and a non-default feature
+    branch with the changes to propose
+- Git push authentication is configured independently of GitHub MCP sign-in
+- the user can push the branch and has permission to create a PR in the target
+    repository
+
+If any prerequisite is unavailable, prepare the artifacts and report the
+specific blocker. Configuration alone is not evidence that OAuth, push, or PR
+creation works; verify each operation in the intended environment before
+reporting success.
+
+---
+
+# Rework Loops
+
+The lifecycle supports explicit return paths.
+
+Examples:
+
+Architecture
+    ↓
+Design Review
+    ↓
+REWORK REQUIRED
+    ↓
+Architecture Rework
+    ↓
+Design Review Again
+
+Implementation
+    ↓
+Code Review
+    ↓
+REWORK REQUIRED
+    ↓
+Implementation Correction
+    ↓
+Code Review Again
+
+Final Verification
+    ↓
+FAIL
+    ↓
+appropriate earlier stage
+    ↓
+re-verification
+
+This is preferable to silently correcting defects during an independent review.
+
+---
+
+# Traceability Model
+
+The framework maintains traceability across:
+
+Requirement
+    ↓
+Architecture
+    ↓
+Implementation Task
+    ↓
+Code
+    ↓
+Test
+    ↓
+Verification Evidence
+
+This makes it possible to answer:
+
+- Why does this code exist?
+- Which requirement does it satisfy?
+- Which architecture decision owns it?
+- Which test verifies it?
+- Has it been independently verified?
+
+---
+
+# Failure Handling Principles
+
+Agents should stop rather than fabricate success.
+
+Examples:
+
+If Architecture Approval is missing:
+
+stop Implementation Planning.
+
+If a dependency task is not DONE:
+
+stop task implementation.
+
+If browser execution is unavailable:
+
+record NOT VERIFIED rather than PASS.
+
+If Git metadata is unavailable:
+
+prepare PR evidence but do not claim a PR was created.
+
+---
+
+# Historical Artifacts
+
+Review artifacts represent the lifecycle state at the time they were produced.
+
+Do not rewrite every historical artifact whenever a later gate changes state.
+
+For example:
+
+design-review.md may contain:
+
+Architecture Approval: PENDING HUMAN APPROVAL
+
+even after:
+
+architecture.md
+
+later records:
+
+Architecture Approval: APPROVED
+
+This is correct historical evidence.
+
+---
+
+# Framework Reuse Checklist
+
+When applying this framework to a new application:
+
+1. create the application directory
+2. configure repository instructions
+3. define the initial user story
+4. run Requirements Analysis
+5. approve requirements
+6. run Architecture
+7. run independent Design Review
+8. approve architecture
+9. create implementation plan
+10. approve implementation plan
+11. execute implementation tasks one at a time
+12. accept each task
+13. run independent Code Review
+14. run Final Verification
+15. prepare the Pull Request
+16. preserve all SDLC evidence
+
+---
+
+# Current Framework Status
+
+The framework was exercised end-to-end using the Meal Planner application.
+
+Validated capabilities include:
+
+- custom instructions
+- specialized agents
+- reusable skills
+- prompt-driven workflows
+- requirements gates
+- architecture review
+- human approvals
+- dependency-ordered implementation
+- task-level human acceptance
+- independent code review
+- final traceability verification
+- PR preparation
+- user-story documentation boundary
+- framework documentation maintenance
+- deterministic hook guardrails (configuration present; runtime verification pending)
+
+The Meal Planner application remains the completed example; its application
+artifacts are evidence of one run, not universal framework requirements.
+
+---
+
+# Official GitHub Documentation Basis
+
+Copilot customization concepts in this framework are based on current GitHub
+documentation for:
+
+- Copilot customization options
+- Custom agents configuration
+- Agent skills
+- Prompt files
+- Repository custom instructions
+- Copilot hooks
+- Copilot plans and usage availability
+
+Always re-check GitHub documentation when adopting the framework because
+feature availability and preview status can change.

@@ -1,76 +1,18 @@
 ---
 name: pull-request-preparation
-description: >
-  Reusable methodology for preparing a completed and verified software change
-  for pull request review, including lifecycle gate checks, Git safety,
-  changelog preparation, PR summaries, test evidence, known limitations,
-  reviewer checklists, safe commit/push operations, and pull request creation.
+description: Safe PR-preparation methodology using the active application's verified lifecycle evidence.
 ---
 
 # Pull Request Preparation Skill
 
-## Purpose
+Entry gate: verification permits PR preparation.
 
-Provide a repeatable method for turning completed and verified software work
-into a review-ready pull request.
+Write:
 
-This skill defines HOW Pull Request Preparation is performed.
+- `<application-root>/CHANGELOG.md`
+- `<SDLC Artifact Directory>/pull-request.md`
 
-It does not implement product changes.
-
-It does not merge pull requests.
-
-## Method
-
-### Step 1 — Verify Lifecycle Gates
-
-Confirm:
-
-- requirements approved
-- architecture approved
-- design review passed
-- implementation plan approved
-- implementation complete
-- code review passed
-- final verification permits PR preparation
-
-Stop if a required gate fails.
-
-### Step 2 — Inspect Repository State
-
-Check:
-
-- current branch
-- default branch
-- remote
-- staged changes
-- unstaged changes
-- untracked files
-- existing commits
-
-Do not discard user work.
-
-### Step 3 — Isolate the Change Safely
-
-Use an existing non-default working branch when appropriate.
-
-If currently on the default branch, create a purpose-specific feature branch.
-
-Never overwrite or force-update another branch.
-
-### Step 4 — Prepare the Changelog
-
-Summarize completed product behavior.
-
-Use verified evidence.
-
-Record actual known limitations.
-
-Do not invent versions or dates when they are not part of the release process.
-
-### Step 5 — Prepare the PR Narrative
-
-Create:
+PR description must include:
 
 - Summary
 - Changes Made
@@ -78,76 +20,33 @@ Create:
 - Known Limitations
 - Reviewer Checklist
 
-The PR should help a reviewer understand both product behavior and verification
-evidence without reading every SDLC artifact first.
+Inspect Git/remote/gh state before claiming commit, push, or PR creation.
 
-### Step 6 — Review the Diff
+## Safe GitHub PR Workflow
 
-Inspect:
+1. Confirm the active application's final verification permits PR preparation.
+2. Inspect the repository root, current branch, base branch, remote, worktree,
+   staged and unstaged diffs, and any existing PR for the head branch.
+3. In a managed story session, remain in that story's selected worktree and
+   branch. Never switch branches, discard work, or stage unrelated changes.
+   If the branch is the default branch or the correct base/remote is ambiguous,
+   stop and ask the human to resolve it.
+4. Prepare the changelog and PR artifact with actual verification evidence.
+5. Present the exact files/diff, proposed commit message, remote, head/base,
+   PR title, and complete PR body. Request one explicit per-run approval before
+   staging/committing PR changes, pushing, or creating the PR.
+6. After approval, use Git for local commit and push. Recheck through GitHub
+   MCP for an existing PR immediately before creation to avoid a concurrent
+   duplicate. Use MCP for remote lookup, creation, and read-back verification.
+   Do not use direct HTTP, configuration-file credentials, or an unapproved
+   CLI fallback.
+7. If an equivalent PR already exists, report its verified URL and status;
+   do not create a duplicate.
+8. Verify the created PR's repository, URL, head, base, and open state before
+   reporting `PULL REQUEST CREATED — READY FOR HUMAN REVIEW`.
 
-- Git diff
-- whitespace errors
-- unexpected generated files
-- secrets
-- unrelated modifications
-- stale temporary files
+Git push authentication and GitHub MCP authentication are separate. If either
+is missing or a remote operation fails, report the specific blocker and use
+`PULL REQUEST PREPARED — REMOTE CREATION BLOCKED`.
 
-Do not use PR preparation as an excuse for unrelated cleanup.
-
-### Step 7 — Commit Safely
-
-Stage only relevant files.
-
-Use an informative commit message.
-
-Do not rewrite existing commit history without explicit instruction.
-
-### Step 8 — Push Safely
-
-Use a normal push.
-
-Set upstream where needed.
-
-Never force push.
-
-### Step 9 — Create the Pull Request
-
-Determine the actual base and head branches.
-
-Create the PR with an explicit:
-
-- title
-- base
-- head
-- body
-
-Do not merge it.
-
-### Step 10 — Verify Remote PR State
-
-Confirm:
-
-- PR exists
-- PR number
-- PR URL
-- PR state
-- head branch
-- base branch
-
-Do not infer creation success from command intent alone.
-
-### Step 11 — Record Evidence
-
-Record PR metadata in the SDLC evidence artifact.
-
-Keep known limitations visible.
-
-### Step 12 — Stop for Human Review
-
-The PR is a human-review gate.
-
-Do not merge automatically.
-
-Final state:
-
-`PULL REQUEST CREATED — READY FOR HUMAN REVIEW`
+Never force push or merge.
